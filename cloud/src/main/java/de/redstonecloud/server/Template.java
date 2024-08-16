@@ -6,14 +6,14 @@ import lombok.Setter;
 @Builder
 @Getter
 public class Template {
-    public String name;
-    public ServerType type;
-    public int maxPlayers;
-    public int minServers;
-    public int maxServers;
-    public boolean staticServer;
-    @Setter
+    private String name;
+    private ServerType type;
+    private int maxPlayers;
+    private int minServers;
+    private int maxServers;
+    private boolean staticServer;
     @Builder.Default
+    @Setter
     public int runningServers = 0;
     @Setter
     @Builder.Default
