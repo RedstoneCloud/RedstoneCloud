@@ -102,7 +102,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>de.redstonecloud.RedstoneCloud</mainClass>
+                            <mainClass>de.redstonecloud.cloud.RedstoneCloud</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
