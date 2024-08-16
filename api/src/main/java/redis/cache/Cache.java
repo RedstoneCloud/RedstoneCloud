@@ -6,6 +6,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import java.util.Collection;
 import java.util.List;
 
 @Getter
@@ -16,7 +17,7 @@ public class Cache {
         this.pool = createJedisPool();
     }
 
-    private JedisPool createJedisPool() {
+    protected JedisPool createJedisPool() {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMinIdle(16);
         config.setMaxIdle(64);
@@ -28,6 +29,17 @@ public class Cache {
     public String set(String key, String value) {
         try (Jedis jedis = this.pool.getResource()) {
             return jedis.set(key, value);
+        }
+    }
+
+    public void setList(String key, Collection<String> collection) {
+        Preconditions.checkArgument(!collection.isEmpty(), "List cannot be empty");
+        try (Jedis jedis = this.pool.getResource()) {
+            jedis.del(key);
+
+            for (String element : collection) {
+                jedis.rpush(key, element);
+            }
         }
     }
 
@@ -47,6 +59,12 @@ public class Cache {
     public List<String> getMany(String... keys) {
         try (Jedis jedis = this.pool.getResource()) {
             return jedis.mget(keys);
+        }
+    }
+
+    public List<String> getList(String key) {
+        try (Jedis jedis = this.pool.getResource()) {
+            return jedis.lrange(key, 0, -1);
         }
     }
 
