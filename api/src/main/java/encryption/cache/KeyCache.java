@@ -17,7 +17,7 @@ public class KeyCache extends Cache {
 
         byte[] keyBytes = key.getEncoded();
         routeList.add(B64.encode(keyBytes));
-        this.setList("encryption." + route, routeList);
+        this.setList("encryption:" + route, routeList);
     }
 
     public void removeKey(String route, PublicKey key) {
@@ -28,7 +28,7 @@ public class KeyCache extends Cache {
 
         byte[] keyBytes = key.getEncoded();
         if (routeList.removeIf(k -> k.equals(B64.encode(keyBytes)))) {
-            this.setList("encryption." + route, routeList);
+            this.setList("encryption:" + route, routeList);
         }
     }
 }

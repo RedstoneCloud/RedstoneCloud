@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import components.ServerStatus;
 import de.redstonecloud.RedstoneCloud;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
@@ -122,6 +123,7 @@ public class ServerManager {
     public Server startServer(Template template) {
         Server srv = Server.builder()
                 .template(template)
+                .createdAt(System.currentTimeMillis())
                 .type(template.type)
                 .port(ThreadLocalRandom.current().nextInt(10000, 50000))
                 .build();
@@ -172,7 +174,7 @@ public class ServerManager {
         int min = Integer.MAX_VALUE;
 
         for (Server server : servers.values()) {
-            if (server.getTemplate().equals(template) && server.getStatus() == Server.Status.RUNNING) {
+            if (server.getTemplate().equals(template) && server.getStatus() == ServerStatus.RUNNING) {
                 //get server with most players
                 if (server.getPlayers().size() < min) {
                     min = server.getPlayers().size();
@@ -191,7 +193,7 @@ public class ServerManager {
         int freeSlots = 0;
 
         for (Server server : servers.values()) {
-            if (server.getTemplate().equals(template) && server.getStatus() == Server.Status.RUNNING) {
+            if (server.getTemplate().equals(template) && server.getStatus() == ServerStatus.RUNNING) {
                 freeSlots += server.getTemplate().getMaxPlayers() - server.getPlayers().size();
             }
         }

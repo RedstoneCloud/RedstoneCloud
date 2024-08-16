@@ -1,6 +1,9 @@
 package de.redstonecloud.server;
 
+import com.google.common.net.HostAndPort;
 import com.google.gson.JsonObject;
+import components.ICloudServer;
+import components.ServerStatus;
 import de.redstonecloud.RedstoneCloud;
 import de.redstonecloud.logger.Logger;
 import lombok.Builder;
@@ -20,7 +23,7 @@ import java.util.Map;
 
 @Builder
 @Getter
-public class Server extends Cacheable {
+public class Server implements ICloudServer, Cacheable {
     public Template template;
     public String name;
     public int port;
@@ -28,8 +31,9 @@ public class Server extends Cacheable {
     //TODO: ADD PLAYER CLASS
     public Map<Long, String> players = new HashMap<>();
     @Builder.Default
-    private Status status = Status.NONE;
+    private ServerStatus status = ServerStatus.NONE;
     public ServerType type;
+    public long createdAt;
     public String directory;
     @Setter
     public ServerLogger logger;
@@ -53,14 +57,15 @@ public class Server extends Cacheable {
         return "server:" + name.toUpperCase();
     }
 
-    public void setStatus(Status status) {
-        Status old = this.status;
+    @Override
+    public void setStatus(ServerStatus status) {
+        ServerStatus old = this.status;
         this.status = status;
         if(old != status) updateCache();
     }
 
     public void writeConsole(String command) {
-        if(status != Status.STARTING && status != Status.RUNNING && status != Status.STOPPING) return;
+        if(status != ServerStatus.STARTING && status != ServerStatus.RUNNING && status != ServerStatus.STOPPING) return;
 
         PrintWriter stdin = new PrintWriter(
                 new BufferedWriter(
@@ -69,31 +74,12 @@ public class Server extends Cacheable {
         stdin.println(command);
     }
 
-    public static enum Status {
-        NONE(-1),
-        PREPARED(0),
-        STARTING(1),
-        RUNNING(2),
-        STOPPING(3),
-        STOPPED(4),
-        ERROR(5),
-        IN_GAME(6),
-        WAITING(7);
-
-        @Getter
-        private final int value;
-
-        Status(int value) {
-            this.value = value;
-        }
-    }
-
     /**
      * SERVER SETUP STUFF
      */
 
     public void prepare() {
-        if(status.value >= Status.PREPARED.value) {
+        if(status.getValue() >= ServerStatus.PREPARED.getValue()) {
             return;
         }
 
@@ -132,33 +118,7 @@ public class Server extends Cacheable {
         }
 
 
-        setStatus(Status.PREPARED);
-    }
-
-    public void start() {
-        if(status.value != Status.PREPARED.value && status.value >= Status.STARTING.value) {
-            return;
-        }
-
-        Logger.getInstance().debug("Starting " + name);
-        setStatus(Status.STARTING);
-
-        processBuilder = new ProcessBuilder(
-                type.startCommand()
-        ).directory(new File(directory));
-
-        try {
-            process = processBuilder.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        this.logger = ServerLogger.builder().server(this).build();
-        this.logger.start();
-
-        process.onExit().thenRun(this::onExit);
-
-        //TODO: server manager stuff
+        setStatus(ServerStatus.PREPARED);
     }
 
     public void onExit() {
@@ -189,24 +149,49 @@ public class Server extends Cacheable {
         }
 
         process.destroy();
-        status = Status.STOPPED;
+        status = ServerStatus.STOPPED;
         resetCache();
         ServerManager.getInstance().remove(this);
     }
 
-    public boolean stop() {
-        if(logger != null) logger.cancel();
-        if(status.value != Status.RUNNING.value) {
-            return false;
+    @Override
+    public void start() {
+        if(status.getValue() != ServerStatus.PREPARED.getValue() && status.getValue() >= ServerStatus.STARTING.getValue()) {
+            return;
         }
 
+        Logger.getInstance().debug("Starting " + name);
+        setStatus(ServerStatus.STARTING);
 
-        final boolean[] stopped = {false};
+        processBuilder = new ProcessBuilder(
+                type.startCommand()
+        ).directory(new File(directory));
+
+        try {
+            process = processBuilder.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        this.logger = ServerLogger.builder().server(this).build();
+        this.logger.start();
+
+        process.onExit().thenRun(this::onExit);
+
+        //TODO: server manager stuff
+    }
+
+    @Override
+    public void stop() {
+        if(logger != null) logger.cancel();
+        if(status.getValue() != ServerStatus.RUNNING.getValue()) {
+            return;
+        }
 
         writeConsole("stop");
         writeConsole("wdend");
 
-        status = Status.STOPPING;
+        status = ServerStatus.STOPPING;
         resetCache();
 
 
@@ -220,18 +205,18 @@ public class Server extends Cacheable {
                         process.destroyForcibly();
                     }
                     process.destroy();
-                    status = Status.STOPPED;
-                    stopped[0] = true;
+                    status = ServerStatus.STOPPED;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    stopped[0] = false;
                 }
             }).start();
         } catch (Exception e) {
             e.printStackTrace();
-            stopped[0] = false;
         }
+    }
 
-        return stopped[0];
+    @Override
+    public HostAndPort getAddress() {
+        return null;
     }
 }

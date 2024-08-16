@@ -1,10 +1,12 @@
 package de.redstonecloud;
 
+import de.redstonecloud.broker.BrokerHandler;
 import de.redstonecloud.scheduler.TaskScheduler;
 import de.redstonecloud.server.ServerLogger;
 import de.redstonecloud.server.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
+import redis.broker.Broker;
 import redis.cache.Cache;
 
 import java.io.BufferedWriter;
@@ -25,13 +27,14 @@ public class RedstoneCloud {
         workingDir = System.getProperty("user.dir");
         cache = new Cache();
 
+        Broker broker = new Broker("cloud", "cloud");
+        broker.listen("cloud", BrokerHandler::handle);
 
         System.setProperty("java.net.preferIPv4Stack", "true");
         System.setProperty("log4j.skipJansi", "false");
         System.setProperty("Dterminal.jline", "true");
         System.setProperty("Dterminal.ansi", "true");
         System.setProperty("Djansi.passthrough", "true");
-
 
         RedstoneCloud cloud = new RedstoneCloud();
 

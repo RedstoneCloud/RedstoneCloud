@@ -1,4 +1,5 @@
 package de.redstonecloud.server;
+import components.ServerStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +34,7 @@ public class Template {
         //if every servers status is not running or starting or preparing, then create a new server
         int blocked = 0;
         for (Server server : servers) {
-            if (server.getStatus() != Server.Status.RUNNING && server.getStatus() != Server.Status.STARTING && server.getStatus() != Server.Status.PREPARED) {
+            if (server.getStatus() != ServerStatus.RUNNING && server.getStatus() != ServerStatus.STARTING && server.getStatus() != ServerStatus.PREPARED) {
                 blocked++;
             }
         }
