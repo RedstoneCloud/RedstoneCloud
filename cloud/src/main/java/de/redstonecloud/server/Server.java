@@ -7,9 +7,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
+import redis.cache.Cache;
+import redis.cache.Cacheable;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
@@ -17,20 +21,18 @@ import java.util.Map;
 
 @Builder
 @Getter
-public class Server {
+public class Server extends Cacheable {
     public Template template;
     public String name;
     public int port;
     @Builder.Default
     //TODO: ADD PLAYER CLASS
     public Map<Long, String> players = new HashMap<>();
-    public int maxPlayers;
     @Builder.Default
     private Status status = Status.NONE;
     public ServerType type;
     public String directory;
     @Setter
-    @Getter
     public ServerLogger logger;
 
     private Process process;
@@ -48,8 +50,8 @@ public class Server {
         return obj.toString();
     }
 
-    public void updateCache() {
-        //CacheManager.setData("server:" + name.toUpperCase(), this.toString());
+    public String cacheKey() {
+        return "server:" + name.toUpperCase();
     }
 
     public void setStatus(Status status) {
@@ -58,6 +60,81 @@ public class Server {
         if(old != status) updateCache();
     }
 
+    public void writeConsole(String command) {
+        if(status != Status.STARTING && status != Status.RUNNING && status != Status.STOPPING) return;
+
+        PrintWriter stdin = new PrintWriter(
+                new BufferedWriter(
+                        new OutputStreamWriter(process.getOutputStream())), true);
+
+        stdin.println(command);
+    }
+
+    public static enum Status {
+        NONE(-1),
+        PREPARED(0),
+        STARTING(1),
+        RUNNING(2),
+        STOPPING(3),
+        STOPPED(4),
+        ERROR(5),
+        IN_GAME(6),
+        WAITING(7);
+
+        @Getter
+        private final int value;
+
+        Status(int value) {
+            this.value = value;
+        }
+    }
+
+    /**
+     * SERVER SETUP STUFF
+     */
+
+    public void prepare() {
+        if(status.value >= Status.PREPARED.value) {
+            return;
+        }
+
+        int servId = 1;
+        if(ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
+            while(ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
+                servId++;
+            }
+        }
+
+        name = template.getName() + "-" + servId;
+
+        if(!template.staticServer) directory = Path.of(RedstoneCloud.workingDir + "/tmp/" + name).toString();
+        else directory = Path.of(RedstoneCloud.workingDir + "/servers/" + name).toString();
+
+        if(!directory.endsWith("/")) directory += "/";
+
+        new File(directory).mkdir();
+
+        File templateDir = new File(RedstoneCloud.workingDir + "/templates/" + template.name);
+
+        try {
+            FileUtils.copyDirectory(templateDir, new File(directory));
+        } catch (Exception e) {
+            Logger.getInstance().error("Failed to copy files from template to server directory for server " + name + " with template " + template.name + ".");
+            e.printStackTrace();
+        }
+
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(directory + type.getPortSettingFile())), StandardCharsets.UTF_8);
+            content = content.replace(type.getPortSettingPlaceholder(), String.valueOf(port));
+
+            Files.write(Paths.get(directory + type.getPortSettingFile()), content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        setStatus(Status.PREPARED);
+    }
 
     public void start() {
         if(status.value != Status.PREPARED.value && status.value >= Status.STARTING.value) {
@@ -67,20 +144,18 @@ public class Server {
         Logger.getInstance().debug("Starting " + name);
         setStatus(Status.STARTING);
 
-        directory = RedstoneCloud.workingDir + "/servers";
-
         processBuilder = new ProcessBuilder(
                 type.getStartCommand()
         ).directory(new File(directory));
-
-        this.logger = ServerLogger.builder().server(this).build();
-        this.logger.start();
 
         try {
             process = processBuilder.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        this.logger = ServerLogger.builder().server(this).build();
+        this.logger.start();
 
         process.onExit().thenRun(this::onExit);
 
@@ -116,6 +191,7 @@ public class Server {
 
         process.destroy();
         status = Status.STOPPED;
+        resetCache();
         ServerManager.getInstance().remove(this);
     }
 
@@ -132,6 +208,7 @@ public class Server {
         writeConsole("wdend");
 
         status = Status.STOPPING;
+        resetCache();
 
 
         try {
@@ -157,54 +234,5 @@ public class Server {
         }
 
         return stopped[0];
-    }
-
-    public void writeConsole(String command) {
-        if(status != Status.STARTING && status != Status.RUNNING && status != Status.STOPPING) return;
-
-        PrintWriter stdin = new PrintWriter(
-                new BufferedWriter(
-                        new OutputStreamWriter(process.getOutputStream())), true);
-
-        stdin.println(command);
-    }
-
-    public void prepare() {
-        if(status.value >= Status.PREPARED.value) {
-            return;
-        }
-
-        int servId = 1;
-        if(ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
-            while(ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
-                servId++;
-            }
-        }
-
-        name = template.getName() + "-" + servId;
-
-        //TODO: PREPARE SERVERS CONFIG
-
-        status = Status.PREPARED;
-    }
-
-
-    public static enum Status {
-        NONE(-1),
-        PREPARED(0),
-        STARTING(1),
-        RUNNING(2),
-        STOPPING(3),
-        STOPPED(4),
-        ERROR(5),
-        IN_GAME(6),
-        WAITING(7);
-
-        @Getter
-        private final int value;
-
-        Status(int value) {
-            this.value = value;
-        }
     }
 }

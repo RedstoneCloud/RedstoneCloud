@@ -94,7 +94,13 @@ public class ServerManager {
                 startCommand[i] = startCommandArray.get(i).getAsString();
             }
 
-            types.put(data.get("name").getAsString(), new ServerType(file.getName(), startCommand, data.get("logsPath").isJsonNull() ? null : data.get("logsPath").getAsString()));
+            types.put(data.get("name").getAsString(), new ServerType(
+                    file.getName(),
+                    startCommand,
+                    data.get("logsPath").isJsonNull() ? null : data.get("logsPath").getAsString(),
+                    data.get("portSettingFile").getAsString(),
+                    data.get("portSettingPlaceholder").getAsString()
+            ));
             System.out.println("Reg " + file.getName() + "(" + data.get("name").getAsString() + ")");
         }
     }
@@ -117,8 +123,6 @@ public class ServerManager {
 
     public Server startServer(Template template) {
         Server srv = Server.builder()
-                .port(1)
-                .maxPlayers(10)
                 .template(template)
                 .type(template.type)
                 .port(ThreadLocalRandom.current().nextInt(10000,50000))

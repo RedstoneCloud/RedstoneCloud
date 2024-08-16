@@ -5,6 +5,7 @@ import de.redstonecloud.server.ServerManager;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import redis.cache.Cache;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,9 +15,12 @@ import java.io.IOException;
 
 public class RedstoneCloud {
     public static String workingDir;
+    public static Cache cache;
 
     public static void main(String[] args) {
         workingDir = System.getProperty("user.dir");
+        cache = new Cache();
+
 
         System.setProperty("java.net.preferIPv4Stack", "true");
         System.setProperty("log4j.skipJansi", "false");
