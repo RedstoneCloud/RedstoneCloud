@@ -7,10 +7,7 @@ import util.B64;
 
 import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 
 public class KeyManager {
     @Getter private static PublicKey publicKey = null;
@@ -35,27 +32,27 @@ public class KeyManager {
     public static String encrypt(String message, PublicKey key) {
         Preconditions.checkNotNull(key, "Encryption keys not initialized");
 
-        try {
-            Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+        byte[] encryptedBytes = doFinal(messageBytes, Cipher.ENCRYPT_MODE, key);
 
-            byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
-            byte[] encryptedBytes = cipher.doFinal(messageBytes);
-            return B64.encode(encryptedBytes);
-        } catch (Exception e) {
-            throw new EncryptionException(e);
-        }
+        return B64.encode(encryptedBytes);
     }
 
     public static String decrypt(String message) {
         Preconditions.checkNotNull(privateKey, "Encryption keys not initialized");
 
+        byte[] encryptedBytes = B64.decode(message);
+        byte[] messageBytes = doFinal(encryptedBytes, Cipher.DECRYPT_MODE, privateKey);
+
+        return new String(messageBytes, StandardCharsets.UTF_8);
+    }
+
+    private static byte[] doFinal(byte[] message, int mode, AsymmetricKey key) {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            cipher.init(mode, key);
 
-            byte[] messageBytes = cipher.doFinal(B64.decode(message));
-            return new String(messageBytes, StandardCharsets.UTF_8);
+            return cipher.doFinal(message);
         } catch (Exception e) {
             throw new EncryptionException(e);
         }
