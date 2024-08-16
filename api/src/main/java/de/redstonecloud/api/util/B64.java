@@ -1,4 +1,4 @@
-package util;
+package de.redstonecloud.api.util;
 
 import java.util.Base64;
 

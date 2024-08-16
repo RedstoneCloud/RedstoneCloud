@@ -1,8 +1,8 @@
 package de.redstonecloud.player;
 
 import com.google.common.net.HostAndPort;
-import components.ICloudPlayer;
-import components.ICloudServer;
+import de.redstonecloud.api.components.ICloudPlayer;
+import de.redstonecloud.api.components.ICloudServer;
 
 public class CloudPlayer implements ICloudPlayer {
 

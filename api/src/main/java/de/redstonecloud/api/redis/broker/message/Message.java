@@ -1,4 +1,4 @@
-package redis.broker.message;
+package de.redstonecloud.api.redis.broker.message;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -8,8 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import redis.broker.Broker;
-import util.EmptyArrays;
+import de.redstonecloud.api.redis.broker.Broker;
+import de.redstonecloud.api.util.EmptyArrays;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;

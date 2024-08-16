@@ -1,6 +1,6 @@
 package de.redstonecloud.broker;
 
-import redis.broker.message.Message;
+import de.redstonecloud.api.redis.broker.message.Message;
 
 public class BrokerHandler {
 

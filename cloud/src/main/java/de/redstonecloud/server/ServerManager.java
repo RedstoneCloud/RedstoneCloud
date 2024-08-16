@@ -3,7 +3,7 @@ package de.redstonecloud.server;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import components.ServerStatus;
+import de.redstonecloud.api.components.ServerStatus;
 import de.redstonecloud.RedstoneCloud;
 import lombok.Getter;
 

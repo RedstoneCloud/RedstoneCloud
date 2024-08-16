@@ -1,5 +1,5 @@
 package de.redstonecloud.server;
-import components.ServerStatus;
+import de.redstonecloud.api.components.ServerStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

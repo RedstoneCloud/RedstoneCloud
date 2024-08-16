@@ -9,8 +9,8 @@ import de.redstonecloud.server.ServerLogger;
 import de.redstonecloud.server.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
-import redis.broker.Broker;
-import redis.cache.Cache;
+import de.redstonecloud.api.redis.broker.Broker;
+import de.redstonecloud.api.redis.cache.Cache;
 
 import java.io.BufferedWriter;
 import java.io.File;

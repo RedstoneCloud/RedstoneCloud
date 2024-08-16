@@ -1,4 +1,4 @@
-package redis.cache;
+package de.redstonecloud.api.redis.cache;
 
 import com.google.common.base.Preconditions;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package redis.cache;
+package de.redstonecloud.api.redis.cache;
 
 public interface Cacheable {
     default void updateCache() {

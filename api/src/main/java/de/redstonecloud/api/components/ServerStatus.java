@@ -1,4 +1,4 @@
-package components;
+package de.redstonecloud.api.components;
 
 import lombok.Getter;
 

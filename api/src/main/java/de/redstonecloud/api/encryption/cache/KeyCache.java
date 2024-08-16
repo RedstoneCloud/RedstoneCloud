@@ -1,7 +1,7 @@
-package encryption.cache;
+package de.redstonecloud.api.encryption.cache;
 
-import redis.cache.Cache;
-import util.B64;
+import de.redstonecloud.api.redis.cache.Cache;
+import de.redstonecloud.api.util.B64;
 
 import java.security.PublicKey;
 import java.util.ArrayList;

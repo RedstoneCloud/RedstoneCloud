@@ -1,9 +1,9 @@
-package encryption;
+package de.redstonecloud.api.encryption;
 
 import com.google.common.base.Preconditions;
-import exception.EncryptionException;
+import de.redstonecloud.api.exception.EncryptionException;
 import lombok.Getter;
-import util.B64;
+import de.redstonecloud.api.util.B64;
 
 import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;

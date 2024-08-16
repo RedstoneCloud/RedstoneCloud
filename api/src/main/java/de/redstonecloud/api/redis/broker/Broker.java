@@ -1,11 +1,11 @@
-package redis.broker;
+package de.redstonecloud.api.redis.broker;
 
 import com.google.common.base.Preconditions;
+import de.redstonecloud.api.redis.broker.message.Message;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
-import redis.broker.message.Message;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 

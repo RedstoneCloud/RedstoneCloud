@@ -2,15 +2,15 @@ package de.redstonecloud.server;
 
 import com.google.common.net.HostAndPort;
 import com.google.gson.JsonObject;
-import components.ICloudServer;
-import components.ServerStatus;
+import de.redstonecloud.api.components.ICloudServer;
+import de.redstonecloud.api.components.ServerStatus;
 import de.redstonecloud.RedstoneCloud;
 import de.redstonecloud.logger.Logger;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
-import redis.cache.Cacheable;
+import de.redstonecloud.api.redis.cache.Cacheable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
