@@ -68,7 +68,7 @@ public class ServerLogger extends Thread {
 
             try {
                 while (running && (line = out.readLine()) != null) {
-                    if (!logToConsole) Logger.getInstance().server(server.getName(), line);
+                    if (logToConsole) Logger.getInstance().server(server.getName(), line);
                     if (writer != null) {
                         try {
                             writer.write(line);
@@ -87,7 +87,7 @@ public class ServerLogger extends Thread {
 
     public void cancel() {
         running = false;
-        writerTask.cancel();
+        if(writerTask != null) writerTask.cancel();
         server.setLogger(null);
         this.errorReader.cancel();
         try {

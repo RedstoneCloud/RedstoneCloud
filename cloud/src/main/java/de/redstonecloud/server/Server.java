@@ -92,19 +92,19 @@ public class Server implements ICloudServer, Cacheable {
 
         name = template.getName() + "-" + servId;
 
-        if(!template.staticServer) directory = Path.of(RedstoneCloud.workingDir + "/tmp/" + name).toString();
+        if(!template.isStaticServer()) directory = Path.of(RedstoneCloud.workingDir + "/tmp/" + name).toString();
         else directory = Path.of(RedstoneCloud.workingDir + "/servers/" + name).toString();
 
         if(!directory.endsWith("/")) directory += "/";
 
         new File(directory).mkdir();
 
-        File templateDir = new File(RedstoneCloud.workingDir + "/templates/" + template.name);
+        File templateDir = new File(RedstoneCloud.workingDir + "/templates/" + template.getName());
 
         try {
             FileUtils.copyDirectory(templateDir, new File(directory));
         } catch (Exception e) {
-            Logger.getInstance().error("Failed to copy files from template to server directory for server " + name + " with template " + template.name + ".");
+            Logger.getInstance().error("Failed to copy files from template to server directory for server " + name + " with template " + template.getName() + ".");
             e.printStackTrace();
         }
 
@@ -129,7 +129,7 @@ public class Server implements ICloudServer, Cacheable {
         Logger.getInstance().debug(name + " exited.");
 
         //copy log file to logs dir if server is not static
-        if(!getTemplate().staticServer && type.logsPath() != null) {
+        if(!getTemplate().isStaticServer() && type.logsPath() != null) {
             synchronized (this) {
                 try {
                     Files.copy(Paths.get(directory + "/" + type.logsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
@@ -183,6 +183,7 @@ public class Server implements ICloudServer, Cacheable {
 
     @Override
     public void stop() {
+        Logger.getInstance().debug("Stopping " + name);
         if(logger != null) logger.cancel();
         if(status.getValue() != ServerStatus.RUNNING.getValue()) {
             return;
