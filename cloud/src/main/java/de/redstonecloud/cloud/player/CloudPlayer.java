@@ -37,7 +37,7 @@ public class CloudPlayer implements ICloudPlayer {
     }
 
     @Override
-    public void getName() {
-
+    public String getName() {
+        return "";
     }
 }

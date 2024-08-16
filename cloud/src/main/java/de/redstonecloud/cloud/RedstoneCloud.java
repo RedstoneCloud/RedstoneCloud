@@ -1,5 +1,7 @@
 package de.redstonecloud.cloud;
 
+import de.redstonecloud.cloud.events.EventManager;
+import de.redstonecloud.cloud.plugin.PluginManager;
 import de.redstonecloud.cloud.server.ServerLogger;
 import de.redstonecloud.cloud.broker.BrokerHandler;
 import de.redstonecloud.cloud.commands.CommandManager;
@@ -50,6 +52,8 @@ public class RedstoneCloud {
     protected Console console;
     protected ConsoleThread consoleThread;
     protected BufferedWriter logFile;
+    protected PluginManager pluginManager;
+    protected EventManager eventManager;
 
     protected boolean stopped = false;
 
@@ -74,7 +78,7 @@ public class RedstoneCloud {
 
 
     public void setup(){
-        String[] dirs = {"./servers", "./templates", "./tmp", "./logs"};
+        String[] dirs = {"./servers", "./templates", "./tmp", "./logs", "./plugins"};
 
         for(String dir : dirs) {
             File f = new File(dir);
@@ -83,17 +87,15 @@ public class RedstoneCloud {
             }
         }
 
-        /*try {
-            this.communicationServer = new CommServer();
-            this.communicationServer.start();
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Cloud.getLogger().error("Failed to start communication server with error: " + e.getMessage());
-        }*/
         this.serverManager = ServerManager.getInstance();
         this.commandManager = new CommandManager();
         commandManager.loadCommands();
+
+        this.eventManager = new EventManager(this);
+
+
+        this.pluginManager = new PluginManager(this);
+        pluginManager.loadAllPlugins();
 
 
         /*taskManager.runRepeatingTask(new TimerTask() {
@@ -114,6 +116,7 @@ public class RedstoneCloud {
 
         this.scheduler.scheduleRepeatingTask(new CheckTemplateTask(), 3000L);
 
+        this.pluginManager.enableAllPlugins();
     }
 
     public void stop() {
@@ -133,6 +136,8 @@ public class RedstoneCloud {
             boolean a = this.serverManager.stopAll();
             System.out.println(a);
             if(a) System.out.println("Stopped all servers.");
+            this.pluginManager.disableAllPlugins();
+            this.eventManager.getThreadedExecutor().shutdown();
             System.out.println("Cloud successfully shut down.");
         } catch (InterruptedException e) {
             e.printStackTrace();

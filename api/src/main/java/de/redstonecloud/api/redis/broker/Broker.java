@@ -45,7 +45,7 @@ public class Broker {
     private void initJedis(String... routes) {
         this.publisher = new Jedis();
         this.subscriber = new Jedis();
-        this.subscriber.subscribe(new BrokerJedisPubSub(), routes);
+        new Thread(() -> this.subscriber.subscribe(new BrokerJedisPubSub(), routes)).start();
     }
 
     public void publish(Message message) {
