@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
-import redis.cache.Cache;
 import redis.cache.Cacheable;
 
 import java.io.*;
@@ -44,7 +43,7 @@ public class Server extends Cacheable {
         obj.addProperty("name", name);
         obj.addProperty("template", template.getName());
         obj.addProperty("status", status.name());
-        obj.addProperty("type", type.getName());
+        obj.addProperty("type", type.name());
         obj.addProperty("port", port);
 
         return obj.toString();
@@ -124,10 +123,10 @@ public class Server extends Cacheable {
         }
 
         try {
-            String content = new String(Files.readAllBytes(Paths.get(directory + type.getPortSettingFile())), StandardCharsets.UTF_8);
-            content = content.replace(type.getPortSettingPlaceholder(), String.valueOf(port));
+            String content = new String(Files.readAllBytes(Paths.get(directory + type.portSettingFile())), StandardCharsets.UTF_8);
+            content = content.replace(type.portSettingPlaceholder(), String.valueOf(port));
 
-            Files.write(Paths.get(directory + type.getPortSettingFile()), content.getBytes(StandardCharsets.UTF_8));
+            Files.write(Paths.get(directory + type.portSettingFile()), content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -145,7 +144,7 @@ public class Server extends Cacheable {
         setStatus(Status.STARTING);
 
         processBuilder = new ProcessBuilder(
-                type.getStartCommand()
+                type.startCommand()
         ).directory(new File(directory));
 
         try {
@@ -170,10 +169,10 @@ public class Server extends Cacheable {
         Logger.getInstance().debug(name + " exited.");
 
         //copy log file to logs dir if server is not static
-        if(!getTemplate().staticServer && type.getLogsPath() != null) {
+        if(!getTemplate().staticServer && type.logsPath() != null) {
             synchronized (this) {
                 try {
-                    Files.copy(Paths.get(directory + "/" + type.getLogsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(Paths.get(directory + "/" + type.logsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

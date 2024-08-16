@@ -1,5 +1,8 @@
 package de.redstonecloud.logger;
 
+import lombok.Getter;
+
+@Getter
 public enum Colors {
     WHITE("white", 'f', "30m"),
     RED("red", 'c', "31m"),
@@ -26,8 +29,8 @@ public enum Colors {
     UNDERLINED("underlined", '_', "4m");
 
 
-    private final String name, javaCode;
-
+    private final String name;
+    private final String javaCode;
     private final char index;
 
     Colors(String name, char index, String javaCode) {
@@ -55,18 +58,6 @@ public enum Colors {
                 ", javaCode='" + javaCode + '\'' +
                 ", index=" + index +
                 '}';
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getJavaCode() {
-        return javaCode;
-    }
-
-    public char getIndex() {
-        return index;
     }
 
 }

@@ -12,8 +12,8 @@ public class Template {
     public int minServers;
     public int maxServers;
     public boolean staticServer;
-    @Builder.Default
     @Setter
+    @Builder.Default
     public int runningServers = 0;
     @Setter
     @Builder.Default

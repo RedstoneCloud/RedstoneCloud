@@ -58,7 +58,7 @@ public class ServerLogger extends Thread {
             @Override
             public void run() {
                 try {
-                    if(writer != null) writer.flush();
+                    if (writer != null) writer.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -67,14 +67,14 @@ public class ServerLogger extends Thread {
 
         //start logging
 
-        while(running && server.getProcess() != null && server.getProcess().getInputStream() != null) {
+        while (running && server.getProcess() != null && server.getProcess().getInputStream() != null) {
             BufferedReader out = new BufferedReader(new InputStreamReader(server.getProcess().getInputStream()));
             String line = "";
 
             try {
-                while(running && (line = out.readLine()) != null){
-                    if(!logToConsole) Logger.getInstance().server(server.getName(), line);
-                    if(writer != null) {
+                while (running && (line = out.readLine()) != null) {
+                    if (!logToConsole) Logger.getInstance().server(server.getName(), line);
+                    if (writer != null) {
                         try {
                             writer.write(line);
                             writer.newLine();
@@ -96,12 +96,12 @@ public class ServerLogger extends Thread {
         server.setLogger(null);
         this.errorReader.cancel();
         try {
-            if(writer != null) writer.flush();
-            if(writer != null) writer.close();
+            if (writer != null) writer.flush();
+            if (writer != null) writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(logToConsole) RedstoneCloud.getInstance().setCurrentLogServer(null);
+        if (logToConsole) RedstoneCloud.getInstance().setCurrentLogServer(null);
 
         this.interrupt();
     }
@@ -112,13 +112,13 @@ public class ServerLogger extends Thread {
             Set<String> sent = new HashSet<>();
             BufferedReader reader = new BufferedReader(new FileReader(logFile.getPath()));
             String line = "";
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 Logger.getInstance().server(server.getName(), line);
                 sent.add(line);
             }
 
             //output all lastMessages
-            for(String msg : lastMessages) {
+            for (String msg : lastMessages) {
                 Logger.getInstance().server(server.getName(), msg);
             }
 

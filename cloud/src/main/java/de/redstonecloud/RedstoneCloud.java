@@ -12,9 +12,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 
+@Getter
 public class RedstoneCloud {
-    public static String workingDir;
-    public static Cache cache;
+    @Getter private static RedstoneCloud instance;
+    @Getter public static String workingDir;
+    @Getter public static Cache cache;
+    @Getter public static boolean running = false;
 
     public static void main(String[] args) {
         workingDir = System.getProperty("user.dir");
@@ -30,26 +33,14 @@ public class RedstoneCloud {
 
         RedstoneCloud cloud = new RedstoneCloud();
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                cloud.stop();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(cloud::stop));
     }
 
-    @Getter
-    public static RedstoneCloud instance;
-    @Getter
-    public ServerManager serverManager;
-    private boolean stopped = false;
-    @Setter
-    @Getter
-    public ServerLogger currentLogServer = null;
-    @Getter
-    public static boolean running = false;
+    @Setter protected ServerLogger currentLogServer = null;
+    protected ServerManager serverManager;
+    protected BufferedWriter logFile;
+    protected boolean stopped = false;
 
-    @Getter
-    public BufferedWriter logFile;
 
     public RedstoneCloud() {
         instance = this;
@@ -100,8 +91,11 @@ public class RedstoneCloud {
     }
 
     public void stop() {
-        if(stopped) return;
-        stopped = true;
+        if (this.stopped || !running) {
+            return;
+        }
+
+        this.stopped = true;
         running = false;
 
         System.out.println("Cloud is shutting down.");

@@ -13,11 +13,11 @@ public class DummyErrorReader extends Thread {
     private boolean running = true;
 
     public void run() {
-        while(running && server.getProcess() != null && server.getProcess().getErrorStream() != null) {
+        while (running && server.getProcess() != null && server.getProcess().getErrorStream() != null) {
             BufferedReader out = new BufferedReader(new InputStreamReader(server.getProcess().getErrorStream()));
             String line = "";
             try {
-                while(running && (line = out.readLine()) != null){
+                while (running && (line = out.readLine()) != null) {
 
                 }
             } catch (IOException e) {

@@ -1,9 +1,11 @@
 package de.redstonecloud.server;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.redstonecloud.RedstoneCloud;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +16,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ServerManager {
     private static ServerManager INSTANCE;
 
-    private Map<String, ServerType> types = new HashMap<>();
-    private Map<String,Template> templates = new HashMap<>();
-    private Map<String,Server> servers = new HashMap<>();
+    protected Object2ObjectOpenHashMap<String, ServerType> types = new Object2ObjectOpenHashMap<>();
+    protected Object2ObjectOpenHashMap<String, Template> templates = new Object2ObjectOpenHashMap<>();
+    protected Object2ObjectOpenHashMap<String, Server> servers = new Object2ObjectOpenHashMap<>();
 
     public static ServerManager getInstance() {
         return INSTANCE != null ? INSTANCE : new ServerManager();
@@ -35,12 +37,10 @@ public class ServerManager {
 
     private void loadTemplates() {
         File folder = new File(RedstoneCloud.workingDir + "/template_configs");
-        if(!folder.exists()) {
-            folder.mkdirs();
-        }
+        Preconditions.checkArgument(folder.exists() || folder.mkdirs(), "Creation of /template_configs folder failed.");
 
-        for(File file : folder.listFiles()) {
-            if(!file.getName().endsWith(".json")) continue;
+        for (File file : Objects.requireNonNull(folder.listFiles())) {
+            if (!file.getName().endsWith(".json")) continue;
 
             String content = "";
             try {
@@ -49,7 +49,7 @@ public class ServerManager {
                 e.printStackTrace();
             }
 
-            if(content.isEmpty()) continue;
+            if (content.isEmpty()) continue;
 
             JsonObject data = JsonParser.parseString(content).getAsJsonObject();
 
@@ -69,12 +69,10 @@ public class ServerManager {
 
     private void loadServerTypes() {
         File folder = new File(RedstoneCloud.workingDir + "/types");
-        if(!folder.exists()) {
-            folder.mkdirs();
-        }
+        Preconditions.checkArgument(folder.exists() || folder.mkdirs(), "Creation of /types folder failed.");
 
-        for(File file : folder.listFiles()) {
-            if(!file.getName().endsWith(".json")) continue;
+        for (File file : Objects.requireNonNull(folder.listFiles())) {
+            if (!file.getName().endsWith(".json")) continue;
 
             String content = "";
             try {
@@ -83,7 +81,7 @@ public class ServerManager {
                 e.printStackTrace();
             }
 
-            if(content.isEmpty()) continue;
+            if (content.isEmpty()) continue;
 
             JsonObject data = JsonParser.parseString(content).getAsJsonObject();
             JsonArray startCommandArray = data.getAsJsonArray("startCommand");
@@ -125,7 +123,7 @@ public class ServerManager {
         Server srv = Server.builder()
                 .template(template)
                 .type(template.type)
-                .port(ThreadLocalRandom.current().nextInt(10000,50000))
+                .port(ThreadLocalRandom.current().nextInt(10000, 50000))
                 .build();
 
         srv.prepare();
@@ -144,20 +142,18 @@ public class ServerManager {
     }
 
     public boolean stopAll() {
-        boolean allStopped = false;
+        boolean allStopped = this.servers.isEmpty();
         int stopped = 0;
 
-        if(servers.isEmpty()) return true;
-
-        for(Server server : servers.values().toArray(Server[]::new).clone()) {
-            synchronized (server) {
+        for (Server server : servers.values().toArray(Server[]::new).clone()) {
+            synchronized(this) {
                 server.stop();
                 stopped++;
             }
+        }
 
-            if(stopped == servers.size()) {
-                allStopped = true;
-            }
+        if (stopped == servers.size()) {
+            allStopped = true;
         }
 
         return allStopped;
@@ -175,10 +171,10 @@ public class ServerManager {
         ArrayList<BestServerResult> best = new ArrayList<>();
         int min = Integer.MAX_VALUE;
 
-        for(Server server : servers.values()) {
-            if(server.getTemplate().equals(template) && server.getStatus() == Server.Status.RUNNING) {
+        for (Server server : servers.values()) {
+            if (server.getTemplate().equals(template) && server.getStatus() == Server.Status.RUNNING) {
                 //get server with most players
-                if(server.getPlayers().size() < min) {
+                if (server.getPlayers().size() < min) {
                     min = server.getPlayers().size();
                     best.add(new BestServerResult(server, server.getTemplate().getMaxPlayers() - server.getPlayers().size()));
                 }
@@ -194,8 +190,8 @@ public class ServerManager {
     public int getTemplateFreeSlots(Template template) {
         int freeSlots = 0;
 
-        for(Server server : servers.values()) {
-            if(server.getTemplate().equals(template) && server.getStatus() == Server.Status.RUNNING) {
+        for (Server server : servers.values()) {
+            if (server.getTemplate().equals(template) && server.getStatus() == Server.Status.RUNNING) {
                 freeSlots += server.getTemplate().getMaxPlayers() - server.getPlayers().size();
             }
         }
@@ -203,13 +199,7 @@ public class ServerManager {
         return freeSlots;
     }
 
-    public class BestServerResult {
-        public Server server;
-        public int freeSlots;
+    public record BestServerResult(Server server, int freeSlots) {
 
-        public BestServerResult(Server server, int freeSlots) {
-            this.server = server;
-            this.freeSlots = freeSlots;
-        }
     }
 }
