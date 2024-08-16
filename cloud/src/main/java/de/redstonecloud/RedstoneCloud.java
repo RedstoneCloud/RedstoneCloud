@@ -1,5 +1,6 @@
 package de.redstonecloud;
 
+import de.redstonecloud.scheduler.TaskScheduler;
 import de.redstonecloud.server.ServerLogger;
 import de.redstonecloud.server.ServerManager;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 
 @Getter
@@ -39,12 +41,17 @@ public class RedstoneCloud {
     @Setter protected ServerLogger currentLogServer = null;
     protected ServerManager serverManager;
     protected BufferedWriter logFile;
+
     protected boolean stopped = false;
+
+    protected final TaskScheduler scheduler;
 
 
     public RedstoneCloud() {
         instance = this;
         running = true;
+
+        this.scheduler = new TaskScheduler(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors()));
 
         try {
             logFile = new BufferedWriter(new FileWriter("./logs/cloud.log", true));

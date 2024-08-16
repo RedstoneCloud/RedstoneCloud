@@ -53,17 +53,13 @@ public class ServerLogger extends Thread {
         }
 
         //timer to flush writer every 5 seconds
-        writerTimer = new Timer();
-        writerTimer.scheduleAtFixedRate(new java.util.TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    if (writer != null) writer.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        RedstoneCloud.getInstance().getScheduler().scheduleRepeatingTask(() -> {
+            try {
+                if (writer != null) writer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }, 0, 5000);
+        }, 5000);
 
         //start logging
 
