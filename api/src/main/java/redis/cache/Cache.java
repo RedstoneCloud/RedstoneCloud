@@ -11,19 +11,25 @@ import java.util.List;
 
 @Getter
 public class Cache {
-    protected JedisPool pool;
+    protected static JedisPool singletonPool;
 
-    public Cache() {
-        this.pool = createJedisPool();
-    }
-
-    protected JedisPool createJedisPool() {
+    protected static void createJedisPool() {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMinIdle(16);
         config.setMaxIdle(64);
         config.setMaxTotal(256);
         config.setBlockWhenExhausted(true);
-        return new JedisPool(config);
+        singletonPool = new JedisPool(config);
+    }
+
+    protected JedisPool pool;
+
+    public Cache() {
+        if (Cache.singletonPool == null) {
+            createJedisPool();
+        }
+
+        this.pool = Cache.singletonPool;
     }
 
     public String set(String key, String value) {
