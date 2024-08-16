@@ -44,7 +44,7 @@ public class Server extends Cacheable {
         obj.addProperty("name", name);
         obj.addProperty("template", template.getName());
         obj.addProperty("status", status.name());
-        obj.addProperty("type", type.getName());
+        obj.addProperty("type", type.name());
         obj.addProperty("port", port);
 
         return obj.toString();
@@ -107,27 +107,27 @@ public class Server extends Cacheable {
 
         name = template.getName() + "-" + servId;
 
-        if(!template.staticServer) directory = Path.of(RedstoneCloud.workingDir + "/tmp/" + name).toString();
+        if(!template.isStaticServer()) directory = Path.of(RedstoneCloud.workingDir + "/tmp/" + name).toString();
         else directory = Path.of(RedstoneCloud.workingDir + "/servers/" + name).toString();
 
         if(!directory.endsWith("/")) directory += "/";
 
         new File(directory).mkdir();
 
-        File templateDir = new File(RedstoneCloud.workingDir + "/templates/" + template.name);
+        File templateDir = new File(RedstoneCloud.workingDir + "/templates/" + template.getName());
 
         try {
             FileUtils.copyDirectory(templateDir, new File(directory));
         } catch (Exception e) {
-            Logger.getInstance().error("Failed to copy files from template to server directory for server " + name + " with template " + template.name + ".");
+            Logger.getInstance().error("Failed to copy files from template to server directory for server " + name + " with template " + template.getName() + ".");
             e.printStackTrace();
         }
 
         try {
-            String content = new String(Files.readAllBytes(Paths.get(directory + type.getPortSettingFile())), StandardCharsets.UTF_8);
-            content = content.replace(type.getPortSettingPlaceholder(), String.valueOf(port));
+            String content = new String(Files.readAllBytes(Paths.get(directory + type.portSettingFile())), StandardCharsets.UTF_8);
+            content = content.replace(type.portSettingPlaceholder(), String.valueOf(port));
 
-            Files.write(Paths.get(directory + type.getPortSettingFile()), content.getBytes(StandardCharsets.UTF_8));
+            Files.write(Paths.get(directory + type.portSettingFile()), content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -145,7 +145,7 @@ public class Server extends Cacheable {
         setStatus(Status.STARTING);
 
         processBuilder = new ProcessBuilder(
-                type.getStartCommand()
+                type.startCommand()
         ).directory(new File(directory));
 
         try {
@@ -170,10 +170,10 @@ public class Server extends Cacheable {
         Logger.getInstance().debug(name + " exited.");
 
         //copy log file to logs dir if server is not static
-        if(!getTemplate().staticServer && type.getLogsPath() != null) {
+        if(!getTemplate().isStaticServer() && type.logsPath() != null) {
             synchronized (this) {
                 try {
-                    Files.copy(Paths.get(directory + "/" + type.getLogsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(Paths.get(directory + "/" + type.logsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

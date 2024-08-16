@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.redstonecloud.RedstoneCloud;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Getter
 public class ServerManager {
     private static ServerManager INSTANCE;
 
@@ -124,7 +126,7 @@ public class ServerManager {
     public Server startServer(Template template) {
         Server srv = Server.builder()
                 .template(template)
-                .type(template.type)
+                .type(template.getType())
                 .port(ThreadLocalRandom.current().nextInt(10000,50000))
                 .build();
 

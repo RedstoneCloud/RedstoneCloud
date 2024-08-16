@@ -14,7 +14,7 @@ public class Console extends SimpleTerminalConsole {
 
     @Override
     protected boolean isRunning() {
-        return server.isRunning();
+        return RedstoneCloud.isRunning();
     }
 
     @Override
