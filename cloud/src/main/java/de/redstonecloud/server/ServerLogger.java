@@ -2,13 +2,13 @@ package de.redstonecloud.server;
 
 import de.redstonecloud.RedstoneCloud;
 import de.redstonecloud.logger.Logger;
+import de.redstonecloud.scheduler.task.TaskHandler;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
 
 @Builder
 public class ServerLogger extends Thread {
@@ -25,7 +25,7 @@ public class ServerLogger extends Thread {
     @lombok.Builder.Default
     private DummyErrorReader errorReader = null;
     @lombok.Builder.Default
-    private Timer writerTimer = null;
+    private TaskHandler<?> writerTask = null;
     @lombok.Builder.Default
     private Set<String> lastMessages = new HashSet<>();
 
@@ -43,7 +43,7 @@ public class ServerLogger extends Thread {
 
         errorReader.start();
 
-        //preprare writer for log file
+        // Prepare writer for logging file
         writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(logFile));
@@ -52,8 +52,8 @@ public class ServerLogger extends Thread {
             e.printStackTrace();
         }
 
-        //timer to flush writer every 5 seconds
-        RedstoneCloud.getInstance().getScheduler().scheduleRepeatingTask(() -> {
+        // Flush writer every 5 seconds
+        this.writerTask = RedstoneCloud.getInstance().getScheduler().scheduleRepeatingTask(() -> {
             try {
                 if (writer != null) writer.flush();
             } catch (IOException e) {
@@ -61,8 +61,7 @@ public class ServerLogger extends Thread {
             }
         }, 5000);
 
-        //start logging
-
+        // Start logging
         while (running && server.getProcess() != null && server.getProcess().getInputStream() != null) {
             BufferedReader out = new BufferedReader(new InputStreamReader(server.getProcess().getInputStream()));
             String line = "";
@@ -88,7 +87,7 @@ public class ServerLogger extends Thread {
 
     public void cancel() {
         running = false;
-        writerTimer.cancel();
+        writerTask.cancel();
         server.setLogger(null);
         this.errorReader.cancel();
         try {
