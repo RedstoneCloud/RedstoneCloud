@@ -1,0 +1,43 @@
+This project includes code and libraries developed by third parties. Below is a summary of the licenses and notices associated with these dependencies.
+
+This product includes software developed at
+The Apache Software Foundation (https://www.apache.org/).
+
+
+Apache Commons IO
+Copyright 2002-2024 The Apache Software Foundation
+
+FastUtil
+Copyright (C) 2002-2024 Sebastiano Vigna
+
+Gson
+Copyright 2008 Google Inc.
+
+Guava
+Copyright (C) 2012 The Guava Authors
+
+Dependencies with compatible licenses used within this project:
+
+Dependency: Lombok
+License: MIT License
+
+Dependency: Jedis
+License: MIT License
+
+
+
+
+All files in this project are licensed under the Apache License, Version 2.0, unless otherwise noted.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+===================================================================
+
+Modifications to this project are documented in the Git commit history.
