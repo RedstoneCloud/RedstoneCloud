@@ -3,6 +3,7 @@ package de.redstonecloud;
 import de.redstonecloud.commands.CommandManager;
 import de.redstonecloud.console.Console;
 import de.redstonecloud.scheduler.TaskScheduler;
+import de.redstonecloud.scheduler.defaults.CheckTemplateTask;
 import de.redstonecloud.server.ServerLogger;
 import de.redstonecloud.server.ServerManager;
 import lombok.Getter;
@@ -107,6 +108,9 @@ public class RedstoneCloud {
         this.consoleThread = new ConsoleThread();
         this.consoleThread.start();
 
+
+        this.scheduler.scheduleRepeatingTask(new CheckTemplateTask(), 3000L);
+
     }
 
     public void stop() {
@@ -116,6 +120,7 @@ public class RedstoneCloud {
 
         this.stopped = true;
         running = false;
+        this.scheduler.stopScheduler();
 
         System.out.println("Cloud is shutting down.");
 

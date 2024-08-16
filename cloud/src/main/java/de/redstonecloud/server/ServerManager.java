@@ -29,10 +29,6 @@ public class ServerManager {
 
         loadServerTypes();
         loadTemplates();
-
-        System.out.println(templates.size());
-
-        startServer(templates.get("Proxy"));
     }
 
     private void loadTemplates() {
@@ -64,8 +60,6 @@ public class ServerManager {
                     .staticServer(data.get("staticServer").getAsBoolean())
                     .build();
             templates.put(data.get("name").getAsString(), t);
-
-            System.out.println("Reg " + file.getName() + "(" + data.get("name").getAsString() + ")");
         }
     }
 
@@ -103,7 +97,6 @@ public class ServerManager {
                     data.get("portSettingFile").getAsString(),
                     data.get("portSettingPlaceholder").getAsString()
             ));
-            System.out.println("Reg " + file.getName() + "(" + data.get("name").getAsString() + ")");
         }
     }
 

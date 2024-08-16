@@ -196,6 +196,7 @@ public class Server extends Cacheable {
     }
 
     public boolean stop() {
+        Logger.getInstance().debug("Stopping " + name);
         if(logger != null) logger.cancel();
         if(status.value != Status.RUNNING.value) {
             return false;
