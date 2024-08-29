@@ -58,7 +58,7 @@ public class PluginLoader {
             }
 
             if (configEntry == null) {
-                log.warn("Jar file " + file.getName() + " doesnt contain a waterdog.yml or plugin.yml!");
+                log.warn("Jar file " + file.getName() + " doesnt contain a redstonecloud.yml or plugin.yml!");
                 return null;
             }
 
