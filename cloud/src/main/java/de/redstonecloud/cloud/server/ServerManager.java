@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.api.components.ServerStatus;
+import de.redstonecloud.cloud.events.defaults.ServerStartEvent;
 import lombok.Getter;
 
 import java.io.File;
@@ -134,6 +135,7 @@ public class ServerManager {
         t.schedule(new TimerTask() {
             public void run() {
                 srv.start();
+                RedstoneCloud.getInstance().getEventManager().callEvent(new ServerStartEvent(srv.getName()));
             }
         }, 1000);
 

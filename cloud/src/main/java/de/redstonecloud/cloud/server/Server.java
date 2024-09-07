@@ -64,6 +64,11 @@ public class Server implements ICloudServer, Cacheable {
         if(old != status) updateCache();
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     public void writeConsole(String command) {
         if(status != ServerStatus.STARTING && status != ServerStatus.RUNNING && status != ServerStatus.STOPPING) return;
 
