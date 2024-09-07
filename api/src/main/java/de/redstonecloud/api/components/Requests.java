@@ -4,10 +4,14 @@ import de.redstonecloud.api.redis.broker.message.Message;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.function.Consumer;
+
 @Getter
 @RequiredArgsConstructor
-public enum Requestor {
-    PLAYER_GET("player:get"),
+public enum Requests {
+    PLAYER_GET("player:get", message -> {
+        String uuid = message.getArguments()[0];
+    }),
     PLAYER_DELETE("player:delete"),
     PLAYER_UPDATE("player:update"),
     SERVER_GET("server:get"),
@@ -16,6 +20,7 @@ public enum Requestor {
     ;
 
     private final String key;
+    private final Consumer<Message> handle;
 
     public Message create(Object... subargs) {
         return new Message.Builder()

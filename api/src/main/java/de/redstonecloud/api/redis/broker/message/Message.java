@@ -2,7 +2,6 @@ package de.redstonecloud.api.redis.broker.message;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -51,29 +50,34 @@ public class Message {
     }
 
     public String toJson() {
-        JsonObject object = new JsonObject();
-        object.addProperty("i", this.id);
-        object.addProperty("f", this.from);
-        object.addProperty("t", this.to);
+        JsonArray object = new JsonArray();
+        object.add(this.id);
+        object.add(this.from);
+        object.add(this.to);
 
         JsonArray array = new JsonArray(this.arguments.length);
         for (String argument : this.arguments) {
             array.add(argument);
         }
-        object.add("a", array);
+        object.add(array);
+
         return object.toString();
     }
 
     public static Message fromJson(String json) {
-        JsonObject object = GSON.fromJson(json, JsonObject.class);
+        JsonArray object = GSON.fromJson(json, JsonArray.class);
 
-        JsonArray arguments = object.getAsJsonArray("a");
+        int messageId = object.get(0).getAsInt();
+        String from = object.get(1).getAsString();
+        String to = object.get(2).getAsString();
+        JsonArray arguments = object.get(3).getAsJsonArray();
+
         String[] argumentsArray = new String[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
             argumentsArray[i] = arguments.get(i).getAsString();
         }
 
-        return new Message(object.get("i").getAsInt(), object.get("f").getAsString(), object.get("t").getAsString(), argumentsArray);
+        return new Message(messageId, from, to, argumentsArray);
     }
 
     @Getter
