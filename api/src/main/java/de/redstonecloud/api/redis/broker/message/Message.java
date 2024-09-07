@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 @Accessors(chain = true)
 @AllArgsConstructor
 public class Message {
-    private static final Gson GSON = new Gson();
+    public static final Gson GSON = new Gson();
 
     protected int id;
     protected String from;

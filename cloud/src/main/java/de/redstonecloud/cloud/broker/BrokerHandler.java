@@ -1,17 +1,13 @@
 package de.redstonecloud.cloud.broker;
 
+import de.redstonecloud.api.components.Request;
 import de.redstonecloud.api.redis.broker.message.Message;
 
 public class BrokerHandler {
 
     public static void handle(Message message) {
-        switch (message.getArguments()[0]) {
-            case "getplayer" -> {}
-            case "updateplayer" -> {}
-            case "deleteplayer" -> {}
-            case "getserver" -> {}
-            case "updateserver" -> {}
-            case "deleteserver" -> {}
-        }
+        String[] args = message.getArguments();
+
+        Request.retrieveRequest(args[0]).ifPresent(request -> request.handle(message));
     }
 }
