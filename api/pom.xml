@@ -16,7 +16,18 @@
         <version.lombok>1.18.34</version.lombok>
         <version.fastutil>8.5.13</version.fastutil>
         <version.gson>2.10.1</version.gson>
+        <version.guava>33.2.1-jre</version.guava>
+        <version.jedis>5.1.2</version.jedis>
+        <version.netty>4.1.113.Final</version.netty>
+        <version.netty.packet>1.3.0</version.netty.packet>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -40,14 +51,25 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.2.1-jre</version>
+            <version>${version.guava}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>5.1.2</version>
+            <version>${version.jedis}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${version.netty}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.PierreSchwang</groupId>
+            <artifactId>Netty-Packet</artifactId>
+            <version>${version.netty.packet}</version>
         </dependency>
     </dependencies>
 

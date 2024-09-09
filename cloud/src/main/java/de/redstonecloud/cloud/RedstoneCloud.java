@@ -1,5 +1,6 @@
 package de.redstonecloud.cloud;
 
+import de.pierreschwang.nettypacket.event.EventRegistry;
 import de.redstonecloud.cloud.events.EventManager;
 import de.redstonecloud.cloud.plugin.PluginManager;
 import de.redstonecloud.cloud.server.ServerLogger;
@@ -13,6 +14,9 @@ import lombok.Getter;
 import lombok.Setter;
 import de.redstonecloud.api.redis.broker.Broker;
 import de.redstonecloud.api.redis.cache.Cache;
+import netty.NettyHelper;
+import netty.server.NettyServer;
+import netty.server.handler.NettyEventHandler;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,11 +50,11 @@ public class RedstoneCloud {
         Runtime.getRuntime().addShutdownHook(new Thread(cloud::stop));
     }
 
+    private ConsoleThread consoleThread;
     @Setter protected ServerLogger currentLogServer = null;
     protected ServerManager serverManager;
     protected CommandManager commandManager;
     protected Console console;
-    protected ConsoleThread consoleThread;
     protected BufferedWriter logFile;
     protected PluginManager pluginManager;
     protected EventManager eventManager;
@@ -58,13 +62,16 @@ public class RedstoneCloud {
     protected boolean stopped = false;
 
     protected final TaskScheduler scheduler;
-
+    protected NettyServer nettyServer;
 
     public RedstoneCloud() {
         instance = this;
         running = true;
 
         this.scheduler = new TaskScheduler(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors()));
+
+        this.nettyServer = new NettyServer(NettyHelper.constructRegistry(), new EventRegistry());
+        this.nettyServer.getEventRegistry().registerEvents(new NettyEventHandler(this.nettyServer));
 
         try {
             logFile = new BufferedWriter(new FileWriter("./logs/cloud.log", true));

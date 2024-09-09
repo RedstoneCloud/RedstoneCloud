@@ -3,6 +3,8 @@ This project includes code and libraries developed by third parties. Below is a 
 This product includes software developed at
 The Apache Software Foundation (https://www.apache.org/).
 
+Netty
+Copyright 2014 The Netty Project
 
 Apache Commons IO
 Copyright 2002-2024 The Apache Software Foundation
@@ -31,6 +33,9 @@ Dependency: Lombok
 License: MIT License
 
 Dependency: Jedis
+License: MIT License
+
+Dependency: Netty-Packet (Copyright (c) 2021 Pierre Maurice Schwang)
 License: MIT License
 
 
