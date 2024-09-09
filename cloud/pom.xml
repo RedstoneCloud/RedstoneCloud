@@ -125,6 +125,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <outputFile>target\${project.artifactId}-${project.version}-shaded.jar</outputFile>
+                </configuration>
             </plugin>
 
         </plugins>

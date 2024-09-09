@@ -28,45 +28,61 @@ public class Logger {
         }
     }
 
-    public static String name() {
-        return "RedstoneCloud";
-    }
+    //public static String name() {
+    //    return "RedstoneCloud";
+    //}
 
     public void error(String error) {
-        String date = this.getDate();
-        writeToLog(date + " | §cERROR : " + name() + " " + error);
-        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
-            System.out.println(Colors.toColor(date + " §7| §cERROR §r: §b" + name() + " §r" + error + "§r"));
-        log.log(Level.ALL, date + " | §cERROR : " + name() + " " + error);
+        error("RedstoneCloud", error);
     }
 
     public void debug(String debug) {
-        String date = this.getDate();
-        writeToLog(date + " | §bDEBUG : " + name() + " " + debug);
-        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
-            System.out.println(Colors.toColor(date + " §7| §bDEBUG §r: §b" + name() + " §r" + debug + "§r"));
-        log.log(Level.ALL, date + " | §bDEBUG : " + name() + " " + debug);
+        debug("RedstoneCloud", debug);
     }
 
     public void warning(String warning) {
-        String date = this.getDate();
-        writeToLog(date + " | §eWARN  : " + name() + " " + warning);
-        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
-            System.out.println(Colors.toColor(date + " §7| §eWARN  §r: §b" + name() + " §r" + warning + "§r"));
-        log.log(Level.ALL, date + " | §eWARN  : " + name() + " " + warning);
+        warning("RedstoneCloud", warning);
     }
 
     public void info(String info) {
-        String date = this.getDate();
-        writeToLog(date + " | §aINFO  : " + name() + " " + info);
-        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
-            System.out.println(Colors.toColor(date + " §7| §aINFO  §r: §b" + name() + " §r" + info + "§r"));
-        log.log(Level.ALL, date + " | §aINFO  : " + name() + " " + info);
+        info("RedstoneCloud", info);
     }
 
     protected String getDate() {
         LocalDateTime dateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         return dateTime.format(formatter);
+    }
+
+    public void error(String name, String error) {
+        String date = this.getDate();
+        writeToLog(date + " | §cERROR : " + name + " " + error);
+        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
+            System.out.println(Colors.toColor(date + " §7| §cERROR §r: §b" + name + " §r" + error + "§r"));
+        log.log(Level.ALL, date + " | §cERROR : " + name + " " + error);
+    }
+
+    public void debug(String name, String debug) {
+        String date = this.getDate();
+        writeToLog(date + " | §bDEBUG : " + name + " " + debug);
+        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
+            System.out.println(Colors.toColor(date + " §7| §bDEBUG §r: §b" + name + " §r" + debug + "§r"));
+        log.log(Level.ALL, date + " | §bDEBUG : " + name + " " + debug);
+    }
+
+    public void warning(String name, String warning) {
+        String date = this.getDate();
+        writeToLog(date + " | §eWARN  : " + name + " " + warning);
+        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
+            System.out.println(Colors.toColor(date + " §7| §eWARN  §r: §b" + name + " §r" + warning + "§r"));
+        log.log(Level.ALL, date + " | §eWARN  : " + name + " " + warning);
+    }
+
+    public void info(String name, String info) {
+        String date = this.getDate();
+        writeToLog(date + " | §aINFO  : " + name + " " + info);
+        if (RedstoneCloud.getInstance().getCurrentLogServer() == null)
+            System.out.println(Colors.toColor(date + " §7| §aINFO  §r: §b" + name + " §r" + info + "§r"));
+        log.log(Level.ALL, date + " | §aINFO  : " + name + " " + info);
     }
 }

@@ -56,6 +56,11 @@ public class Broker {
         this.consumers.computeIfAbsent(channel, k -> new ObjectArrayList<>()).add(callback);
     }
 
+    public void shutdown() {
+        this.publisher.close();
+        this.subscriber.close();
+    }
+
     public void addPendingResponse(int id, Consumer<Message> callback) {
         Preconditions.checkArgument(!this.pendingResponses.containsKey(id), "A message with the same id is already waiting for a response");
         this.pendingResponses.put(id, callback);

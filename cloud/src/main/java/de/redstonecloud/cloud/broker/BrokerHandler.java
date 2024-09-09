@@ -8,6 +8,8 @@ public class BrokerHandler {
     public static void handle(Message message) {
         String[] args = message.getArguments();
 
+        System.out.println("GOT " + args[0] + " FROM " + message.getFrom());
+
         Request.retrieveRequest(args[0]).ifPresent(request -> request.handle(message));
     }
 }
