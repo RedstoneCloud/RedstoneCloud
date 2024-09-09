@@ -1,5 +1,6 @@
 package netty.client;
 
+import de.pierreschwang.nettypacket.Packet;
 import de.pierreschwang.nettypacket.event.EventRegistry;
 import de.pierreschwang.nettypacket.handler.PacketChannelInboundHandler;
 import de.pierreschwang.nettypacket.handler.PacketDecoder;
@@ -52,5 +53,9 @@ public class NettyClient extends ChannelInitializer<Channel> {
                         new PacketChannelInboundHandler(this.eventRegistry));
 
         this.channel = channel;
+    }
+
+    public void sendPacket(Packet packet) {
+        this.channel.writeAndFlush(packet);
     }
 }

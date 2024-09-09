@@ -1,5 +1,6 @@
 package netty.server;
 
+import de.pierreschwang.nettypacket.Packet;
 import de.pierreschwang.nettypacket.event.EventRegistry;
 import de.pierreschwang.nettypacket.handler.PacketChannelInboundHandler;
 import de.pierreschwang.nettypacket.handler.PacketDecoder;
@@ -16,6 +17,10 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Getter
 @Setter
@@ -54,5 +59,20 @@ public class NettyServer extends ChannelInitializer<Channel> {
                 .addLast(new PacketDecoder(this.packetRegistry),
                         new PacketEncoder(this.packetRegistry),
                         new PacketChannelInboundHandler(this.eventRegistry));
+    }
+
+    public void sendPacket(String clientId, Packet packet) {
+        Optional.ofNullable(this.channelCache.getOrDefault(clientId, null))
+                .ifPresent(channel -> channel.writeAndFlush(packet));
+    }
+
+    public void sendPacketMulti(String idPattern, Packet packet) {
+        Pattern pattern = Pattern.compile(idPattern.replace("*", ".*")
+                .replace("?", "."));
+
+        this.channelCache.entrySet().stream()
+                .filter(entry -> pattern.matcher(entry.getKey()).matches())
+                .map(Map.Entry::getValue)
+                .forEach(channel -> channel.writeAndFlush(packet));
     }
 }
