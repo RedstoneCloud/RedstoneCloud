@@ -23,6 +23,8 @@ java -jar redstonecloud.jar
 ```
 The cloud will generate a basic configuration structure automatically.
 
+Ensure that you have the latest version of our [Bridge](https://github.com/RedstoneCloud/CloudBridge) installed on your server to establish a connection to the cloud.
+
 ## 🙌 How to Contribute
 We encourage contributions to help improve RedstoneCloud! Here's how you can get involved:
 
