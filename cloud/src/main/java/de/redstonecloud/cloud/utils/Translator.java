@@ -7,6 +7,7 @@ import de.redstonecloud.cloud.RedstoneCloud;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 
 public class Translator {
     private static JsonObject langFile;
@@ -29,18 +30,7 @@ public class Translator {
         String value = langFile.get(key).getAsString();
 
         if (replace != null && replace.length > 0) {
-            StringBuilder sb = new StringBuilder(value);
-            String str = sb.toString();
-            int i = 0;
-            for (Object rep : replace) {
-                /*int index = sb.indexOf("{" + i +"}");
-                if (index != -1) {
-                    sb.replace(index, index + 3, String.valueOf(rep));
-                }*/
-                str = str.replace("{"+i+"}", String.valueOf(rep));
-                i++;
-            }
-            value = str;
+            value = MessageFormat.format(value, replace);
         }
 
         return value;

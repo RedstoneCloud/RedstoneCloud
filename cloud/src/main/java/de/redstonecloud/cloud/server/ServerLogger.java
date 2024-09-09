@@ -80,7 +80,7 @@ public class ServerLogger extends Thread {
                     lastMessages.add(line);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }
