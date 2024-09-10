@@ -8,5 +8,6 @@
   "cloud.server.prepare": "Preparing {0}...",
   "cloud.server.exited": "Server {0} exited.",
   "cloud.server.starting": "{0} is starting...",
-  "cloud.server.stopping": "{0} is stopping..."
+  "cloud.server.stopping": "{0} is stopping...",
+  "cloud.server.ready": "{0} is ready."
 }

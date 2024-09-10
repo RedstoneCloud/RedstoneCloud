@@ -1,3 +1,8 @@
 {
-  "redis_port": 6379
+  "redis_port": 6379,
+  "bridge": {
+    "hub_template": "Server",
+    "hubcommand_desc": "hub cmd lol",
+    "hubcommand_no_hub_avaiable": "no hub found buddy"
+  }
 }
