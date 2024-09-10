@@ -8,6 +8,7 @@ import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 public class Cache {
@@ -84,6 +85,12 @@ public class Cache {
     public boolean exists(String key) {
         try (Jedis jedis = this.pool.getResource()) {
             return jedis.exists(key);
+        }
+    }
+
+    public Set<String> keys(String prefix) {
+        try (Jedis jedis = this.pool.getResource()) {
+            return jedis.keys(prefix);
         }
     }
 }
