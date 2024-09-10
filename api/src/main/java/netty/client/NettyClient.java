@@ -15,7 +15,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import netty.packet.ClientAuthPacket;
+import netty.packet.communication.ClientAuthPacket;
 
 @Getter
 @Setter
