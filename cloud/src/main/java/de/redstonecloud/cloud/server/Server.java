@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import de.redstonecloud.api.components.ICloudServer;
 import de.redstonecloud.api.components.ServerStatus;
 import de.redstonecloud.cloud.RedstoneCloud;
+import de.redstonecloud.cloud.config.CloudConfig;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.utils.Translator;
 import lombok.Builder;
@@ -171,6 +172,8 @@ public class Server implements ICloudServer, Cacheable {
         processBuilder = new ProcessBuilder(
                 type.startCommand()
         ).directory(new File(directory));
+
+        processBuilder.environment().put("REDIS_PORT", String.valueOf(CloudConfig.getCfg().get("redis_port").getAsInt()));
 
         this.logger = ServerLogger.builder().server(this).build();
 

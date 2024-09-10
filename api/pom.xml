@@ -98,6 +98,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <outputFile>target\${project.artifactId}-${project.version}-shaded.jar</outputFile>
                 </configuration>
             </plugin>

@@ -1,6 +1,7 @@
 package de.redstonecloud.cloud;
 
 import de.pierreschwang.nettypacket.event.EventRegistry;
+import de.redstonecloud.cloud.config.CloudConfig;
 import de.redstonecloud.cloud.events.EventManager;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.plugin.PluginManager;
@@ -13,13 +14,17 @@ import de.redstonecloud.cloud.scheduler.TaskScheduler;
 import de.redstonecloud.cloud.scheduler.defaults.CheckTemplateTask;
 import de.redstonecloud.cloud.server.ServerManager;
 import de.redstonecloud.cloud.utils.Translator;
+import de.redstonecloud.cloud.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
 import de.redstonecloud.api.redis.broker.Broker;
 import de.redstonecloud.api.redis.cache.Cache;
+import lombok.SneakyThrows;
 import netty.NettyHelper;
 import netty.server.NettyServer;
 import netty.server.handler.NettyEventHandler;
+import redis.embedded.RedisServer;
+import redis.embedded.RedisServerBuilder;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,9 +40,22 @@ public class RedstoneCloud {
     @Getter public static String workingDir;
     @Getter public static Cache cache;
     @Getter public static boolean running = false;
+    private static RedisServer redisServer;
 
+    @SneakyThrows
     public static void main(String[] args) {
         workingDir = System.getProperty("user.dir");
+
+        try {
+            redisServer = new RedisServer(CloudConfig.getCfg().get("redis_port").getAsInt());
+            System.setProperty("redis.port", CloudConfig.getCfg().get("redis_port").getAsString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        redisServer.start();
+
+        Thread.sleep(2000);
+
         cache = new Cache();
 
         try {
@@ -156,6 +174,14 @@ public class RedstoneCloud {
             this.eventManager.getThreadedExecutor().shutdown();
             logger.info(Translator.translate("cloud.shutdown.complete"));
             Broker.get().shutdown();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                redisServer.stop();
+            }).start();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

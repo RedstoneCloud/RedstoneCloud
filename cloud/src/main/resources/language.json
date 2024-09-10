@@ -1,0 +1,12 @@
+{
+  "cloud.startup": "RedstoneCloud is booting up...",
+  "cloud.shutdown.started": "RedstoneCloud is shutting down...",
+  "cloud.shutdown.servers": "Stopped all servers",
+  "cloud.shutdown.plugins": "Disabled all plugins",
+  "cloud.shutdown.complete": "RedstoneCloud shut down successfully",
+  "cloud.startup.redis": "Connecting to Redis Server...",
+  "cloud.server.prepare": "Preparing {0}...",
+  "cloud.server.exited": "Server {0} exited.",
+  "cloud.server.starting": "{0} is starting...",
+  "cloud.server.stopping": "{0} is stopping..."
+}

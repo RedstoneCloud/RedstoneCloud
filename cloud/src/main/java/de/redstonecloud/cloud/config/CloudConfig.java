@@ -1,0 +1,26 @@
+package de.redstonecloud.cloud.config;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import de.redstonecloud.cloud.RedstoneCloud;
+import lombok.Getter;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class CloudConfig {
+    private static JsonObject cfg;
+
+    public static JsonObject getCfg() {
+        if(cfg == null) {
+            try {
+                cfg = new Gson().fromJson(Files.readString(Paths.get(RedstoneCloud.workingDir + "/cloud.json")), JsonObject.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return cfg;
+    }
+}
