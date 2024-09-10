@@ -5,7 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.RequiredArgsConstructor;
 import netty.server.NettyServer;
-import netty.packet.ClientAuthPacket;
+import netty.packet.communication.ClientAuthPacket;
 
 @RequiredArgsConstructor
 public class NettyEventHandler {

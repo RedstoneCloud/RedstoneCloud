@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import netty.packet.communication.ClientAuthPacket;
 
 @Getter
 @Setter
@@ -53,6 +54,8 @@ public class NettyClient extends ChannelInitializer<Channel> {
                         new PacketChannelInboundHandler(this.eventRegistry));
 
         this.channel = channel;
+
+        this.sendPacket(new ClientAuthPacket(this.clientId));
     }
 
     public void sendPacket(Packet packet) {

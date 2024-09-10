@@ -1,26 +1,30 @@
-package netty.packet;
+package netty.packet.template;
 
 import de.pierreschwang.nettypacket.Packet;
 import de.pierreschwang.nettypacket.buffer.PacketBuffer;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter
 @Setter
 @Accessors(chain = true)
-public class ClientAuthPacket extends Packet {
-    public static int NETWORK_ID = 0x00;
+@NoArgsConstructor
+@AllArgsConstructor
+public class GetBestTemplatePacket extends Packet {
+    public static int NETWORK_ID = 0x01;
 
-    protected String clientId;
+    protected String template;
 
     @Override
     public void read(PacketBuffer buffer) {
-        this.clientId = buffer.readUTF8();
+        this.template = buffer.readUTF8();
     }
 
     @Override
     public void write(PacketBuffer buffer) {
-        buffer.writeUTF8(this.clientId);
+        buffer.writeUTF8(this.template);
     }
 }
