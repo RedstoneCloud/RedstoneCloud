@@ -174,14 +174,7 @@ public class RedstoneCloud {
             this.eventManager.getThreadedExecutor().shutdown();
             logger.info(Translator.translate("cloud.shutdown.complete"));
             Broker.get().shutdown();
-            new Thread(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                redisServer.stop();
-            }).start();
+            redisServer.stop();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -65,7 +65,7 @@ public class Broker {
     public void addPendingResponse(int id, Consumer<Message> callback) {
         Preconditions.checkArgument(!this.pendingResponses.containsKey(id), "A message with the same id is already waiting for a response");
         this.pendingResponses.put(id, callback);
-        CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS).execute(() ->
+        CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS).execute(() ->
                 Optional.ofNullable(this.pendingResponses.remove(id))
                         .ifPresent(consumer -> consumer.accept(null)));
     }

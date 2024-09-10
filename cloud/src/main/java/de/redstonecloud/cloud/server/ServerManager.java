@@ -93,7 +93,7 @@ public class ServerManager {
             }
 
             types.put(data.get("name").getAsString(), new ServerType(
-                    file.getName(),
+                    data.get("name").getAsString(),
                     startCommand,
                     data.get("isProxy").getAsBoolean(),
                     data.get("logsPath").isJsonNull() ? null : data.get("logsPath").getAsString(),

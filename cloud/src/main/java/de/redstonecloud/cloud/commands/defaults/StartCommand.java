@@ -4,6 +4,7 @@ import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.cloud.commands.Command;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.server.Template;
+import org.apache.logging.log4j.core.pattern.NotANumber;
 
 public class StartCommand extends Command {
     public int argCount = 1;
@@ -15,7 +16,7 @@ public class StartCommand extends Command {
     @Override
     protected void onCommand(String[] args) {
         if(args.length == 0) {
-            Logger.getInstance().error("Usage: start <template>");
+            Logger.getInstance().error("Usage: start <template> [count]");
             return;
         }
 
@@ -23,6 +24,12 @@ public class StartCommand extends Command {
         if (template == null) {
             Logger.getInstance().error("Template not found.");
             return;
+        }
+
+        if(args.length == 2) {
+            for (int i = 1; i < Integer.parseInt(args[1]); i++) {
+                RedstoneCloud.getInstance().getServerManager().startServer(template);
+            }
         }
 
         RedstoneCloud.getInstance().getServerManager().startServer(template);
