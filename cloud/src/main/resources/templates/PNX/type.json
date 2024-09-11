@@ -1,0 +1,8 @@
+{
+  "name": "PNX",
+  "startCommand": ["java", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "-jar", "server.jar"],
+  "logsPath": "logs/server.log",
+  "portSettingPlaceholder": "[port]",
+  "portSettingFile": "server.properties",
+  "isProxy": false
+}

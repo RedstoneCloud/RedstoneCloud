@@ -1,0 +1,8 @@
+{
+  "name": "WDPE",
+  "startCommand": ["java", "-jar", "proxy.jar"],
+  "logsPath": "logs/server.log",
+  "portSettingPlaceholder": "[port]",
+  "portSettingFile": "config.yml",
+  "isProxy": true
+}

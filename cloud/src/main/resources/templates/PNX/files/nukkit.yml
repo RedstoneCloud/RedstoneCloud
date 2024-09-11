@@ -1,0 +1,103 @@
+# Server's base configuration
+settings:
+  # Server's language settings
+  language: eng
+  # Whether the server translates the text when sending or the client translates
+  forceServerTranslate: false
+  # Message sent when the server shuts down
+  shutdownMessage: Server closed
+  # Whether the query protocol displays plugin information
+  queryPlugins: true
+  # Whether to prompt for deprecated events for plugin
+  deprecatedVerbose: true
+  # Number of threads used by the server scheduler, 'auto' means automatic allocation
+  asyncWorkers: auto
+  # nukkit.server.settings.baseSettings.safeSpawn
+  safeSpawn: true
+  # Whether to install the Spark plugin on the server
+  installSpark: true
+  # Whether to enable WaterdogPE compatibility mode on the server
+  waterdogpe: false
+  # Tick cycle for server auto-save
+  autosave: 6000
+  # Whether to save unknown blocks, such as custom blocks that are not registered
+  saveUnknownBlock: true
+# Server's network configuration
+network-settings:
+  # Compression level of the compression algorithm used by the server
+  compressionLevel: 7
+  # Zlib compression algorithm provider used by the server. 0 for Java's original algorithm
+  #  1 for single-threaded low memory usage algorithm
+  #  2 for multi-threaded caching algorithm
+  #  3 for hardware-accelerated algorithm
+  zlibProvider: 3
+  # Whether the server uses Snappy compression (not recommended)
+  snappy: false
+  # Buffer for server decompression
+  compressionBufferSize: 1048576
+  # Maximum number of bytes the server can decompress
+  maxDecompressSize: 67108864
+  # Maximun number of packet per seconds
+  packetLimit: 240
+# Server's debug configuration
+debug-settings:
+  # Server's debug level [INFO, DEBUG, TRACE, ALL]
+  level: INFO
+  # Whether to enable debug commands
+  command: false
+  # Ignored packet logs at TRACE level
+  ignoredPackets: []
+# Server's world configuration
+level-settings:
+  # Whether the server dynamically adjusts the tick rate
+  autoTickRate: true
+  # Maximum adjustable tick count
+  autoTickRateLimit: 20
+  # Base tick rate
+  baseTickRate: 1
+  # Whether to tick players
+  alwaysTickPlayers: false
+  # Whether to enable Redstone functionality
+  enableRedstone: true
+  # nukkit.server.settings.levelSettings.tickRedstone
+  tickRedstone: true
+  # Chunk unload tick cycle
+  chunkUnloadDelay: 15000
+# Server's chunk configuration
+chunk-settings:
+  # Maximum number of chunks sent to players per tick
+  perTickSend: 8
+  # Number of chunks a player needs to receive upon first spawn
+  spawnThreshold: 56
+  # Tick cycle of chunks
+  chunksPerTicks: 40
+  # Tick radius of chunks
+  tickRadius: 3
+  # Whether chunks perform light updates
+  lightUpdates: true
+  # Whether to clear the tick list at the end of each tick
+  clearTickList: false
+  # Maximum number of terrain generation tasks executed simultaneously
+  generationQueueSize: 128
+# Server's freeze array configuration
+memory-settings:
+  # Whether to enable the freeze array
+  enable: true
+  slots: 32
+  defaultTemperature: 32
+  freezingPoint: 0
+  boilingPoint: 1024
+  absoluteZero: -256
+  melting: 16
+  singleOperation: 1
+  batchOperation: 32
+# Server's player configuration
+player-settings:
+  # Whether to save player data
+  savePlayerData: true
+  # Cooldown time for players changing skins
+  skinChangeCooldown: 30
+  # Whether to force trust player skins, allowing players to use third-party skins freely
+  forceSkinTrusted: false
+  # Whether to check player movement
+  checkMovement: true

@@ -1,5 +1,8 @@
 package de.redstonecloud.cloud;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.pierreschwang.nettypacket.event.EventRegistry;
 import de.redstonecloud.cloud.config.CloudConfig;
 import de.redstonecloud.cloud.events.EventManager;
@@ -23,6 +26,7 @@ import lombok.SneakyThrows;
 import netty.NettyHelper;
 import netty.server.NettyServer;
 import netty.server.handler.NettyEventHandler;
+import org.apache.commons.io.FileUtils;
 import redis.embedded.RedisServer;
 import redis.embedded.RedisServerBuilder;
 
@@ -30,6 +34,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Scanner;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +52,8 @@ public class RedstoneCloud {
     @SneakyThrows
     public static void main(String[] args) {
         workingDir = System.getProperty("user.dir");
+
+        if(!new File("./.cloud.setup").exists()) setup();
 
         try {
             redisServer = new RedisServer(CloudConfig.getCfg().get("redis_port").getAsInt());
@@ -89,11 +98,171 @@ public class RedstoneCloud {
 
     protected boolean stopped = false;
 
-    protected final TaskScheduler scheduler;
+    protected TaskScheduler scheduler;
     protected NettyServer nettyServer;
 
     public RedstoneCloud() {
         instance = this;
+        boot();
+    }
+
+    private static void setup() {
+        Scanner input = new Scanner(System.in);
+        String result;
+
+        Gson gson = new Gson();
+
+        boolean redis = true;
+        int intRedisPort = 6379;
+        boolean downloadRedis = true;
+
+        System.out.println("RedstoneCloud comes with a built-in redis instance. Would you like to use it? [y/n] (default: y)");
+        result = input.nextLine();
+        if(result.toLowerCase().contains("n")) redis = false;
+
+        if(redis) {
+            System.out.println("Please provide a redis port you want to use. [number] (default: 6379)");
+            try {
+                intRedisPort = input.nextInt();
+            } catch(Exception e) {
+                System.out.println("Provided invalid port, using default port.");
+            }
+
+            System.out.println("There is a redis update avaiable (Redis 7.2). Do you want to download it? Otherwise outdated Redis 2.8 will be used. [y/n] (default: y)");
+            result = input.nextLine();
+            if(result.toLowerCase().contains("n")) downloadRedis = false;
+
+            //TODO: DOWNLOAD REDIS
+        } else {
+            //TODO: CUSTOM REDIS INSTANCE
+        }
+
+        System.out.println("Settings completed. Generating basic file structure...");
+        createBaseFolders();
+        System.out.println("Basic folders generated. Starting server config...");
+
+        JsonObject supportedSoftware = null;
+
+        try {
+            supportedSoftware = gson.fromJson(Utils.readFileFromResources("supportedSoftware.json"), JsonObject.class);
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.out.println("Error while reading supportedSoftware.json, shutting down...");
+            System.exit(0);
+        }
+
+        if(supportedSoftware == null) {
+            System.out.println("Output of supportedSoftware.json is null, shutting down...");
+            System.exit(0);
+        }
+
+        boolean setupProxy = true;
+        boolean setupServer = true;
+
+        System.out.println("Would you like to setup a proxy instance? [y/n] (default: y)");
+        result = input.nextLine();
+        if(result.toLowerCase().contains("n")) setupProxy = false;
+
+        if(setupProxy) {
+            System.out.println("Please select a proxy software you want to use " + supportedSoftware.get("proxy").getAsJsonArray().toString().replace("\"", ""));
+            result = input.nextLine();
+            if(!supportedSoftware.get("proxy").getAsJsonArray().contains(new JsonParser().parse(result.toUpperCase()))) {
+                System.out.println("Proxy software " + result + " is unknown.");
+                System.exit(0);
+            }
+            System.out.println("Generating structure for " + result + "...");
+            try {
+                JsonObject settings = gson.fromJson(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/settings.json"), JsonObject.class);
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/template_cfg.json"), new File("./template_configs/Proxy.json"));
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/type.json"), new File("./types/" + result.toUpperCase() + ".json"));
+                Utils.copyFolderFromCurrentJar("templates/" + result.toUpperCase() + "/files", new File("./templates/Proxy/"));
+                System.out.println("Copied important files, downloading software...");
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url.txt")).toURL(), new File("./templates/Proxy/proxy.jar"));
+                System.out.println("Downloaded software successfully.");
+
+                System.out.println("Installing CloudBridge on Proxy...");
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url_bridge.txt")).toURL(), new File("./templates/Proxy/" + settings.get("pluginDir").getAsString() + "/CloudBridge.jar"));
+                System.out.println("Installed CloudBridge");
+
+                System.out.println("Proxy installed successfully. \n\n\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Cannot setup proxy, shutting down...");
+                System.exit(0);
+            }
+        }
+
+        System.out.println("Would you like to setup a server instance? [y/n] (default: y)");
+        result = input.nextLine();
+        if(result.toLowerCase().contains("n")) setupServer = false;
+
+        if(setupServer) {
+            System.out.println("Please select a server software you want to use " + supportedSoftware.get("server").getAsJsonArray().toString().replace("\"", ""));
+            result = input.nextLine();
+            if(!supportedSoftware.get("server").getAsJsonArray().contains(new JsonParser().parse(result.toUpperCase()))) {
+                System.out.println("Server software " + result + " is unknown.");
+                System.exit(0);
+            }
+            System.out.println("Generating structure for " + result + "...");
+            try {
+                JsonObject settings = gson.fromJson(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/settings.json"), JsonObject.class);
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/template_cfg.json"), new File("./template_configs/Lobby.json"));
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/type.json"), new File("./types/" + result.toUpperCase() + ".json"));
+                Utils.copyFolderFromCurrentJar("templates/" + result.toUpperCase() + "/files", new File("./templates/Lobby/"));
+                System.out.println("Copied important files, downloading software...");
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url.txt")).toURL(), new File("./templates/Lobby/server.jar"));
+                System.out.println("Downloaded software successfully.");
+
+                System.out.println("Installing CloudBridge on Server...");
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url_bridge.txt")).toURL(), new File("./templates/Lobby/" + settings.get("pluginDir").getAsString() + "/CloudBridge.jar"));
+                System.out.println("Installed CloudBridge");
+
+                System.out.println("Server installed successfully. \n\n\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Cannot setup Server, shutting down...");
+                System.exit(0);
+            }
+
+            System.out.println("Copying cloud setup files...");
+            try {
+                FileUtils.copyURLToFile(Utils.getResourceFile("cloud.json"), new File("./cloud.json"));
+                FileUtils.copyURLToFile(Utils.getResourceFile("language.json"), new File("./language.json"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Copying cloud files failed, shutting down...");
+                System.exit(0);
+            }
+            System.out.println("Copied cloud files.");
+
+            System.out.println("\n\n");
+            System.out.println("Cloud setup completed.");
+            System.out.println("====================");
+            System.out.println("Built-in redis: " + redis);
+            System.out.println("Built-in redis port: " + intRedisPort);
+            System.out.println("Updated built-in redis: " + downloadRedis);
+            System.out.println("Setup proxy: " + setupProxy);
+            System.out.println("Setup server: " + setupServer);
+            System.out.println("====================");
+
+            System.out.println();
+            System.out.println("Please press Enter to start the cloud.");
+            input.next();
+        }
+    }
+
+    private static void createBaseFolders() {
+        String[] dirs = {"./servers", "./templates", "./tmp", "./logs", "./plugins", "./template_configs", "./types"};
+
+        for(String dir : dirs) {
+            File f = new File(dir);
+            if(!f.exists()) {
+                f.mkdir();
+            }
+        }
+    }
+
+    public void boot(){
         running = true;
         logger = Logger.getInstance();
 
@@ -109,19 +278,9 @@ public class RedstoneCloud {
         }
 
         logger.info(Translator.translate("cloud.startup"));
-        setup();
-    }
 
 
-    public void setup(){
-        String[] dirs = {"./servers", "./templates", "./tmp", "./logs", "./plugins"};
-
-        for(String dir : dirs) {
-            File f = new File(dir);
-            if(!f.exists()) {
-                f.mkdir();
-            }
-        }
+        createBaseFolders();
 
         this.serverManager = ServerManager.getInstance();
         this.commandManager = new CommandManager();
