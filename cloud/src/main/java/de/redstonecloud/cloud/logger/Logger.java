@@ -16,8 +16,16 @@ public class Logger {
         LocalDateTime myDateObj = LocalDateTime.now();
         DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("HH:mm:ss");
         String formattedDate = myDateObj.format(myFormatObj);
-        System.out.println(Colors.toColor(formattedDate + " §7| §rLOG   §r: §b" + name + " §r" + message + "§r"));
+        System.out.println(Colors.toColor(formattedDate + " §7| §rLOG   §r: §b" + name + " §r" + message + "§r "));
         log.log(Level.ALL, formattedDate + " | §7LOG   : " + name + " " + message);
+    }
+
+    public void setup(String name, String message, boolean newLine) {
+        System.out.print(Colors.toColor("§b" + name + " §r| " + message + "§r") + (newLine ? "\n" : ""));
+    }
+
+    public void setup(String name, String message) {
+        setup(name,message,false);
     }
 
     private void writeToLog(String message) {

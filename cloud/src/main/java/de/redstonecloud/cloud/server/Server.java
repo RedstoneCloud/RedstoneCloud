@@ -140,7 +140,7 @@ public class Server implements ICloudServer, Cacheable {
         if(!getTemplate().isStaticServer() && type.logsPath() != null) {
             synchronized (this) {
                 try {
-                    Files.copy(Paths.get(directory + "/" + type.logsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
+                    if(new File(directory + "/" + type.logsPath()).exists()) Files.copy(Paths.get(directory + "/" + type.logsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
