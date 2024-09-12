@@ -13,7 +13,11 @@ public class CloudConfig {
     private static JsonObject cfg;
 
     public static JsonObject getCfg() {
-        if(cfg == null) {
+        return getCfg(false);
+    }
+
+    public static JsonObject getCfg(boolean reload) {
+        if (reload || cfg == null) {
             try {
                 cfg = new Gson().fromJson(Files.readString(Paths.get(RedstoneCloud.workingDir + "/cloud.json")), JsonObject.class);
             } catch (IOException e) {

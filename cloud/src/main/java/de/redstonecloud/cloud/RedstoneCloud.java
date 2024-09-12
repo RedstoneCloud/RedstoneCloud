@@ -1,9 +1,7 @@
 package de.redstonecloud.cloud;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import de.pierreschwang.nettypacket.event.EventRegistry;
 import de.redstonecloud.cloud.config.CloudConfig;
 import de.redstonecloud.cloud.events.EventManager;
@@ -29,14 +27,12 @@ import netty.server.NettyServer;
 import netty.server.handler.NettyEventHandler;
 import org.apache.commons.io.FileUtils;
 import redis.embedded.RedisServer;
-import redis.embedded.RedisServerBuilder;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -47,17 +43,21 @@ import java.util.concurrent.TimeUnit;
 
 @Getter
 public class RedstoneCloud {
-    @Getter private static RedstoneCloud instance;
-    @Getter public static String workingDir;
-    @Getter public static Cache cache;
-    @Getter public static boolean running = false;
+    @Getter
+    private static RedstoneCloud instance;
+    @Getter
+    public static String workingDir;
+    @Getter
+    public static Cache cache;
+    @Getter
+    public static boolean running = false;
     private static RedisServer redisServer;
 
     @SneakyThrows
     public static void main(String[] args) {
         workingDir = System.getProperty("user.dir");
 
-        if(!new File("./.cloud.setup").exists()) setup();
+        if (!new File("./.cloud.setup").exists()) setup();
 
         try {
             redisServer = RedisServer.builder()
@@ -78,7 +78,7 @@ public class RedstoneCloud {
             System.out.println(Translator.translate("cloud.startup.redis"));
             Broker broker = new Broker("cloud", "cloud");
             broker.listen("cloud", BrokerHandler::handle);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Cannot connect to Redis: " + e);
         }
 
@@ -94,8 +94,10 @@ public class RedstoneCloud {
     }
 
     private ConsoleThread consoleThread;
-    @Getter protected static Logger logger;
-    @Setter protected ServerLogger currentLogServer = null;
+    @Getter
+    protected static Logger logger;
+    @Setter
+    protected ServerLogger currentLogServer = null;
     protected ServerManager serverManager;
     protected CommandManager commandManager;
     protected Console console;
@@ -124,15 +126,15 @@ public class RedstoneCloud {
         int intRedisPort = 6379;
         boolean downloadRedis = true;
 
-        l.setup("RC Setup", "§cRedstoneCloud comes with a built-in redis instance. Would you like to use it? §3[y/n] §a(default: y)");
+        l.setup("RC Setup", "§cRedstoneCloud comes with a built-in redis instance. Would you like to use it? §3[y/n] §a(default: y): ");
         result = input.nextLine();
-        if(result.toLowerCase().contains("n")) redis = false;
+        if (result.toLowerCase().contains("n")) redis = false;
 
-        if(redis) {
-            l.setup("RC Setup", "§cPlease provide a redis port you want to use. §3[number] §a(default: 6379)");
+        if (redis) {
+            l.setup("RC Setup", "§cPlease provide a redis port you want to use. §3[number] §a(default: 6379): ");
             try {
                 intRedisPort = input.nextInt();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 l.setup("RC Setup", "§eProvided invalid port, using default port.", true);
             }
 
@@ -157,13 +159,13 @@ public class RedstoneCloud {
 
         try {
             supportedSoftware = gson.fromJson(Utils.readFileFromResources("supportedSoftware.json"), JsonObject.class);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             l.setup("RC Setup", "§4Error while reading supportedSoftware.json, shutting down...", true);
             System.exit(0);
         }
 
-        if(supportedSoftware == null) {
+        if (supportedSoftware == null) {
             l.setup("RC Setup", "§4Output of supportedSoftware.json is null, shutting down...", true);
             System.exit(0);
         }
@@ -171,29 +173,30 @@ public class RedstoneCloud {
         boolean setupProxy = true;
         boolean setupServer = true;
 
-        l.setup("RC Setup", "§cWould you like to setup a proxy instance? §3[y/n] §a(default: y)");
+        l.setup("RC Setup", "§cWould you like to setup a proxy instance? §3[y/n] §a(default: y): ");
         result = input.nextLine();
-        if(result.toLowerCase().contains("n")) setupProxy = false;
+        if (result.toLowerCase().contains("n")) setupProxy = false;
 
-        if(setupProxy) {
-            l.setup("RC Setup", "§cPlease select a proxy software you want to use §3" + supportedSoftware.get("proxy").getAsJsonArray().toString().replace("\"", ""));
+        if (setupProxy) {
+            l.setup("RC Setup", "§cPlease select a proxy software you want to use §3" + supportedSoftware.get("proxy").getAsJsonArray().toString().replace("\"", "") + " ");
             result = input.nextLine();
-            if(!supportedSoftware.get("proxy").getAsJsonArray().contains(new JsonParser().parse(result.toUpperCase()))) {
+            String finalResult = result.toUpperCase();
+            if (supportedSoftware.get("proxy").getAsJsonArray().asList().stream().noneMatch(proxy -> proxy.getAsString().equalsIgnoreCase(finalResult))) {
                 l.setup("RC Setup", "§eProxy software " + result + " is unknown.", true);
                 System.exit(0);
             }
             l.setup("RC Setup", "§eGenerating structure for " + result + "...", true);
             try {
-                JsonObject settings = gson.fromJson(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/settings.json"), JsonObject.class);
-                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/template_cfg.json"), new File("./template_configs/Proxy.json"));
-                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/type.json"), new File("./types/" + result.toUpperCase() + ".json"));
-                Utils.copyFolderFromCurrentJar("templates/" + result.toUpperCase() + "/files", new File("./templates/Proxy/"));
+                JsonObject settings = gson.fromJson(Utils.readFileFromResources("templates/" + finalResult + "/settings.json"), JsonObject.class);
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + finalResult + "/template_cfg.json"), new File("./template_configs/Proxy.json"));
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + finalResult + "/type.json"), new File("./types/" + finalResult + ".json"));
+                Utils.copyFolderFromCurrentJar("templates/" + finalResult + "/files", new File("./templates/Proxy/"));
                 l.setup("RC Setup", "§eCopied important files, downloading software...", true);
-                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url.txt")).toURL(), new File("./templates/Proxy/proxy.jar"));
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + finalResult + "/download_url.txt")).toURL(), new File("./templates/Proxy/proxy.jar"));
                 l.setup("RC Setup", "§eDownloaded software successfully.", true);
 
                 l.setup("RC Setup", "§eInstalling CloudBridge on Proxy...", true);
-                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url_bridge.txt")).toURL(), new File("./templates/Proxy/" + settings.get("pluginDir").getAsString() + "/CloudBridge.jar"));
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + finalResult + "/download_url_bridge.txt")).toURL(), new File("./templates/Proxy/" + settings.get("pluginDir").getAsString() + "/CloudBridge.jar"));
                 l.setup("RC Setup", "§eInstalled CloudBridge", true);
 
                 l.setup("RC Setup", "§eProxy installed successfully. \n", true);
@@ -206,27 +209,28 @@ public class RedstoneCloud {
 
         l.setup("RC Setup", "§cWould you like to setup a server instance? §3[y/n] §a(default: y)");
         result = input.nextLine();
-        if(result.toLowerCase().contains("n")) setupServer = false;
+        if (result.toLowerCase().contains("n")) setupServer = false;
 
-        if(setupServer) {
+        if (setupServer) {
             l.setup("RC Setup", "§cPlease select a server software you want to use §3" + supportedSoftware.get("server").getAsJsonArray().toString().replace("\"", ""));
             result = input.nextLine();
-            if(!supportedSoftware.get("server").getAsJsonArray().contains(new JsonParser().parse(result.toUpperCase()))) {
+            String finalResult = result.toUpperCase();
+            if (supportedSoftware.get("server").getAsJsonArray().asList().stream().noneMatch(server -> server.getAsString().equalsIgnoreCase(finalResult))) {
                 l.setup("RC Setup", "§eServer software " + result + " is unknown.", true);
                 System.exit(0);
             }
             l.setup("RC Setup", "§eGenerating structure for " + result + "...", true);
             try {
-                JsonObject settings = gson.fromJson(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/settings.json"), JsonObject.class);
-                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/template_cfg.json"), new File("./template_configs/Lobby.json"));
-                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + result.toUpperCase() + "/type.json"), new File("./types/" + result.toUpperCase() + ".json"));
-                Utils.copyFolderFromCurrentJar("templates/" + result.toUpperCase() + "/files", new File("./templates/Lobby/"));
+                JsonObject settings = gson.fromJson(Utils.readFileFromResources("templates/" + finalResult + "/settings.json"), JsonObject.class);
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + finalResult + "/template_cfg.json"), new File("./template_configs/Lobby.json"));
+                FileUtils.copyURLToFile(Utils.getResourceFile("templates/" + finalResult + "/type.json"), new File("./types/" + finalResult + ".json"));
+                Utils.copyFolderFromCurrentJar("templates/" + finalResult + "/files", new File("./templates/Lobby/"));
                 l.setup("RC Setup", "§eCopied important files, downloading software...", true);
-                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url.txt")).toURL(), new File("./templates/Lobby/server.jar"));
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + finalResult + "/download_url.txt")).toURL(), new File("./templates/Lobby/server.jar"));
                 l.setup("RC Setup", "§eDownloaded software successfully.", true);
 
                 l.setup("RC Setup", "§eInstalling CloudBridge on Server...", true);
-                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + result.toUpperCase() + "/download_url_bridge.txt")).toURL(), new File("./templates/Lobby/" + settings.get("pluginDir").getAsString() + "/CloudBridge.jar"));
+                FileUtils.copyURLToFile(URI.create(Utils.readFileFromResources("templates/" + finalResult + "/download_url_bridge.txt")).toURL(), new File("./templates/Lobby/" + settings.get("pluginDir").getAsString() + "/CloudBridge.jar"));
                 l.setup("RC Setup", "§eInstalled CloudBridge", true);
 
                 l.setup("RC Setup", "§eServer installed successfully. \n", true);
@@ -259,12 +263,13 @@ public class RedstoneCloud {
             l.setup("RC Setup", "====================", true);
 
             try {
-                JsonObject cfgFile = gson.fromJson(Files.readString(Paths.get(RedstoneCloud.workingDir + "/config.json")), JsonObject.class);
-                cfgFile.remove("redis_port");
+                JsonObject cfgFile = CloudConfig.getCfg();
                 cfgFile.addProperty("redis_port", intRedisPort);
 
-                Files.write(Paths.get(RedstoneCloud.workingDir + "/cloud.json"), cfgFile.toString().getBytes(StandardCharsets.UTF_8));
-                Files.write(Paths.get(RedstoneCloud.workingDir + "/.cloud.setup"), "Cloud is set up. Do not delete this file or the setup will start again.".getBytes(StandardCharsets.UTF_8));
+                Files.writeString(Paths.get(RedstoneCloud.workingDir + "/cloud.json"), cfgFile.toString());
+                Files.writeString(Paths.get(RedstoneCloud.workingDir + "/.cloud.setup"), "Cloud is set up. Do not delete this file or the setup will start again.");
+
+                CloudConfig.getCfg(true); // Reload config fur future uses
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -273,7 +278,7 @@ public class RedstoneCloud {
             l.setup("RC Setup", "§cPlease press Enter to start the cloud.", true);
 
             try {
-                System.in.read(new byte[2]);
+                System.in.read(new byte[2]); // TODO: Handle
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -283,15 +288,15 @@ public class RedstoneCloud {
     private static void createBaseFolders() {
         String[] dirs = {"./servers", "./templates", "./tmp", "./logs", "./plugins", "./template_configs", "./types"};
 
-        for(String dir : dirs) {
+        for (String dir : dirs) {
             File f = new File(dir);
-            if(!f.exists()) {
+            if (!f.exists()) {
                 f.mkdir();
             }
         }
     }
 
-    public void boot(){
+    public void boot() {
         running = true;
         logger = Logger.getInstance();
 
@@ -357,7 +362,7 @@ public class RedstoneCloud {
             Thread.sleep(200);
             logger.info(Translator.translate("cloud.shutdown.started"));
             boolean a = this.serverManager.stopAll();
-            if(a) logger.info(Translator.translate("cloud.shutdown.servers"));
+            if (a) logger.info(Translator.translate("cloud.shutdown.servers"));
             this.pluginManager.disableAllPlugins();
             logger.info(Translator.translate("cloud.shutdown.plugins"));
             this.eventManager.getThreadedExecutor().shutdown();
@@ -378,7 +383,7 @@ public class RedstoneCloud {
 
         @Override
         public void run() {
-            if(isRunning()) console.start();
+            if (isRunning()) console.start();
         }
     }
 }
