@@ -299,6 +299,7 @@ public class RedstoneCloud {
 
         this.nettyServer = new NettyServer(NettyHelper.constructRegistry(), new EventRegistry());
         this.nettyServer.getEventRegistry().registerEvents(new NettyEventHandler(this.nettyServer));
+        this.nettyServer.setPort(51123).bind();
 
         try {
             logFile = new BufferedWriter(new FileWriter("./logs/cloud.log", true));
