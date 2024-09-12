@@ -142,7 +142,7 @@ public class RedstoneCloud {
             }
 
             /*
-            l.setup("RC Setup", "§cThere is a redis update avaiable (Redis 7.2). Do you want to download it? Otherwise outdated Redis 2.8 will be used. §3[y/n] §a(default: y)");
+            l.setup("RC Setup", "§cThere is a redis update avaiable (Redis 7.2). Do you want to download it? Otherwise, outdated Redis 2.8 will be used. §3[y/n] §a(default: y)");
             result = input.nextLine();
             if(result.toLowerCase().contains("n")) downloadRedis = false;
             System.out.println();
@@ -242,49 +242,49 @@ public class RedstoneCloud {
                 l.setup("RC Setup", "§4Cannot setup Server, shutting down...", true);
                 System.exit(0);
             }
+        }
 
-            l.setup("RC Setup", "§eCopying cloud setup files...", true);
-            try {
-                FileUtils.copyURLToFile(Utils.getResourceFile("cloud.json"), new File("./config.json"));
-                FileUtils.copyURLToFile(Utils.getResourceFile("language.json"), new File("./language.json"));
-            } catch (IOException e) {
-                e.printStackTrace();
-                l.setup("RC Setup", "§4Copying cloud files failed, shutting down...", true);
-                System.exit(0);
-            }
-            l.setup("RC Setup", "§eCopied cloud files.", true);
+        l.setup("RC Setup", "§eCopying cloud setup files...", true);
+        try {
+            FileUtils.copyURLToFile(Utils.getResourceFile("cloud.json"), new File("./config.json"));
+            FileUtils.copyURLToFile(Utils.getResourceFile("language.json"), new File("./language.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            l.setup("RC Setup", "§4Copying cloud files failed, shutting down...", true);
+            System.exit(0);
+        }
+        l.setup("RC Setup", "§eCopied cloud files.", true);
 
-            l.setup("RC Setup", "", true);
-            l.setup("RC Setup", "", true);
-            l.setup("RC Setup", "§eCloud setup completed.", true);
-            l.setup("RC Setup", "====================", true);
-            l.setup("RC Setup", "Built-in redis: " + redis, true);
-            l.setup("RC Setup", "Built-in redis port: " + intRedisPort, true);
-            l.setup("RC Setup", "Updated built-in redis: " + downloadRedis, true);
-            l.setup("RC Setup", "Setup proxy: " + setupProxy, true);
-            l.setup("RC Setup", "Setup server: " + setupServer, true);
-            l.setup("RC Setup", "====================", true);
+        l.setup("RC Setup", "", true);
+        l.setup("RC Setup", "", true);
+        l.setup("RC Setup", "§eCloud setup completed.", true);
+        l.setup("RC Setup", "====================", true);
+        l.setup("RC Setup", "Built-in redis: " + redis, true);
+        l.setup("RC Setup", "Built-in redis port: " + intRedisPort, true);
+        l.setup("RC Setup", "Updated built-in redis: " + downloadRedis, true);
+        l.setup("RC Setup", "Setup proxy: " + setupProxy, true);
+        l.setup("RC Setup", "Setup server: " + setupServer, true);
+        l.setup("RC Setup", "====================", true);
 
-            try {
-                JsonObject cfgFile = CloudConfig.getCfg();
-                cfgFile.addProperty("redis_port", intRedisPort);
+        try {
+            JsonObject cfgFile = CloudConfig.getCfg();
+            cfgFile.addProperty("redis_port", intRedisPort);
 
-                Files.writeString(Paths.get(RedstoneCloud.workingDir + "/cloud.json"), cfgFile.toString());
-                Files.writeString(Paths.get(RedstoneCloud.workingDir + "/.cloud.setup"), "Cloud is set up. Do not delete this file or the setup will start again.");
+            Files.writeString(Paths.get(RedstoneCloud.workingDir + "/cloud.json"), cfgFile.toString());
+            Files.writeString(Paths.get(RedstoneCloud.workingDir + "/.cloud.setup"), "Cloud is set up. Do not delete this file or the setup will start again.");
 
-                CloudConfig.getCfg(true); // Reload config fur future uses
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            CloudConfig.getCfg(true); // Reload config fur future uses
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            l.setup("RC Setup", "", true);
-            l.setup("RC Setup", "§cPlease press Enter to start the cloud.", true);
+        l.setup("RC Setup", "", true);
+        l.setup("RC Setup", "§cPlease press Enter to start the cloud.", true);
 
-            try {
-                System.in.read(new byte[2]); // TODO: Handle
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            System.in.read(new byte[2]); // TODO: Handle
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
