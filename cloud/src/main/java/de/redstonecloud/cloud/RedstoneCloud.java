@@ -207,12 +207,12 @@ public class RedstoneCloud {
             }
         }
 
-        l.setup("RC Setup", "§cWould you like to setup a server instance? §3[y/n] §a(default: y)");
+        l.setup("RC Setup", "§cWould you like to setup a server instance? §3[y/n] §a(default: y): ");
         result = input.nextLine();
         if (result.toLowerCase().contains("n")) setupServer = false;
 
         if (setupServer) {
-            l.setup("RC Setup", "§cPlease select a server software you want to use §3" + supportedSoftware.get("server").getAsJsonArray().toString().replace("\"", ""));
+            l.setup("RC Setup", "§cPlease select a server software you want to use §3" + supportedSoftware.get("server").getAsJsonArray().toString().replace("\"", "") + " ");
             result = input.nextLine();
             String finalResult = result.toUpperCase();
             if (supportedSoftware.get("server").getAsJsonArray().asList().stream().noneMatch(server -> server.getAsString().equalsIgnoreCase(finalResult))) {
