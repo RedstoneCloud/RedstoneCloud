@@ -1,4 +1,4 @@
-package netty.server;
+package de.redstonecloud.api.netty.server;
 
 import de.pierreschwang.nettypacket.Packet;
 import de.pierreschwang.nettypacket.event.EventRegistry;

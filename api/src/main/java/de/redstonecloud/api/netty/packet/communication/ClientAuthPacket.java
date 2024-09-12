@@ -1,4 +1,4 @@
-package netty.packet.communication;
+package de.redstonecloud.api.netty.packet.communication;
 
 import de.pierreschwang.nettypacket.Packet;
 import de.pierreschwang.nettypacket.buffer.PacketBuffer;

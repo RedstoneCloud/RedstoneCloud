@@ -1,9 +1,9 @@
-package netty;
+package de.redstonecloud.api.netty;
 
 import de.pierreschwang.nettypacket.registry.IPacketRegistry;
 import de.pierreschwang.nettypacket.registry.SimplePacketRegistry;
-import netty.packet.communication.ClientAuthPacket;
-import netty.packet.template.GetBestTemplatePacket;
+import de.redstonecloud.api.netty.packet.communication.ClientAuthPacket;
+import de.redstonecloud.api.netty.packet.template.GetBestTemplatePacket;
 
 public class NettyHelper {
 

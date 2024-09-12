@@ -3,6 +3,8 @@ package de.redstonecloud.cloud;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import de.pierreschwang.nettypacket.event.EventRegistry;
+import de.redstonecloud.api.encryption.KeyManager;
+import de.redstonecloud.api.encryption.cache.KeyCache;
 import de.redstonecloud.cloud.config.CloudConfig;
 import de.redstonecloud.cloud.events.EventManager;
 import de.redstonecloud.cloud.logger.Logger;
@@ -22,9 +24,9 @@ import lombok.Setter;
 import de.redstonecloud.api.redis.broker.Broker;
 import de.redstonecloud.api.redis.cache.Cache;
 import lombok.SneakyThrows;
-import netty.NettyHelper;
-import netty.server.NettyServer;
-import netty.server.handler.NettyEventHandler;
+import de.redstonecloud.api.netty.NettyHelper;
+import de.redstonecloud.api.netty.server.NettyServer;
+import de.redstonecloud.api.netty.server.handler.NettyEventHandler;
 import org.apache.commons.io.FileUtils;
 import redis.embedded.RedisServer;
 
@@ -33,9 +35,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.PublicKey;
 import java.util.Scanner;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -109,6 +111,7 @@ public class RedstoneCloud {
 
     protected TaskScheduler scheduler;
     protected NettyServer nettyServer;
+    protected KeyCache keyCache;
 
     public RedstoneCloud() {
         instance = this;
@@ -305,6 +308,10 @@ public class RedstoneCloud {
         this.nettyServer = new NettyServer(NettyHelper.constructRegistry(), new EventRegistry());
         this.nettyServer.getEventRegistry().registerEvents(new NettyEventHandler(this.nettyServer));
         this.nettyServer.setPort(51123).bind();
+
+        PublicKey publicKey = KeyManager.init();
+        this.keyCache = new KeyCache();
+        this.keyCache.addKey("cloud", publicKey);
 
         try {
             logFile = new BufferedWriter(new FileWriter("./logs/cloud.log", true));

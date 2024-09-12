@@ -1,11 +1,11 @@
-package netty.server.handler;
+package de.redstonecloud.api.netty.server.handler;
 
 import de.pierreschwang.nettypacket.event.PacketSubscriber;
+import de.redstonecloud.api.netty.server.NettyServer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.RequiredArgsConstructor;
-import netty.server.NettyServer;
-import netty.packet.communication.ClientAuthPacket;
+import de.redstonecloud.api.netty.packet.communication.ClientAuthPacket;
 
 @RequiredArgsConstructor
 public class NettyEventHandler {

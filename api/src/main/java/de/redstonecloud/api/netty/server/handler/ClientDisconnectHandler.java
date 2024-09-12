@@ -1,9 +1,9 @@
-package netty.server.handler;
+package de.redstonecloud.api.netty.server.handler;
 
+import de.redstonecloud.api.netty.server.NettyServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.RequiredArgsConstructor;
-import netty.server.NettyServer;
 
 @RequiredArgsConstructor
 public class ClientDisconnectHandler extends ChannelInboundHandlerAdapter {

@@ -1,4 +1,4 @@
-package netty.client;
+package de.redstonecloud.api.netty.client;
 
 import de.pierreschwang.nettypacket.Packet;
 import de.pierreschwang.nettypacket.event.EventRegistry;
@@ -15,7 +15,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import netty.packet.communication.ClientAuthPacket;
+import de.redstonecloud.api.netty.packet.communication.ClientAuthPacket;
 
 @Getter
 @Setter
