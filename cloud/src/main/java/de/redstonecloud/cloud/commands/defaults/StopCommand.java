@@ -16,18 +16,18 @@ public class StopCommand extends Command {
 
     @Override
     protected void onCommand(String[] args) {
-        if(args.length == 0) {
+        if (args.length == 0) {
             Logger.getInstance().error("Usage: stop <server>");
             return;
         }
 
         Server server = RedstoneCloud.getInstance().getServerManager().getServer(args[0]);
         if (server == null) {
-            if(args[0].endsWith("*")) {
+            if (args[0].endsWith("*")) {
                 Server[] servers = RedstoneCloud.getInstance().getServerManager().getServers().values().toArray(new Server[0]);
                 Server[] affectedServers = Arrays.stream(servers).filter(s -> s.getName().startsWith(args[0].substring(0, args[0].length() - 1))).toArray(Server[]::new);
 
-                for(Server s : affectedServers) {
+                for (Server s : affectedServers) {
                     s.stop();
                 }
 

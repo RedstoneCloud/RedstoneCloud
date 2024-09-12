@@ -1,6 +1,7 @@
 package de.redstonecloud.cloud.utils;
 
 import lombok.Builder;
+import lombok.NonNull;
 
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -23,7 +24,7 @@ public final class ThreadFactoryBuilder implements ThreadFactory {
     }
 
     @Override
-    public Thread newThread(Runnable runnable) {
+    public Thread newThread(@NonNull Runnable runnable) {
         Thread thread = backingFactory.newThread(runnable);
 
         if (format != null) {

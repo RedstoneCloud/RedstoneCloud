@@ -8,6 +8,8 @@ import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.cloud.config.CloudConfig;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.utils.Translator;
+import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,8 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
 
 @Builder
 @Getter
@@ -31,7 +31,7 @@ public class Server implements ICloudServer, Cacheable {
     public int port;
     @Builder.Default
     //TODO: ADD PLAYER CLASS
-    public Map<Long, String> players = new HashMap<>();
+    public Long2ObjectOpenHashMap<String> players = new Long2ObjectOpenHashMap<>();
     @Builder.Default
     private ServerStatus status = ServerStatus.NONE;
     public ServerType type;
@@ -64,7 +64,7 @@ public class Server implements ICloudServer, Cacheable {
     public void setStatus(ServerStatus status) {
         ServerStatus old = this.status;
         this.status = status;
-        if(old != status) updateCache();
+        if (old != status) updateCache();
     }
 
     @Override
@@ -73,7 +73,8 @@ public class Server implements ICloudServer, Cacheable {
     }
 
     public void writeConsole(String command) {
-        if(status != ServerStatus.STARTING && status != ServerStatus.RUNNING && status != ServerStatus.STOPPING) return;
+        if (status != ServerStatus.STARTING && status != ServerStatus.RUNNING && status != ServerStatus.STOPPING)
+            return;
 
         PrintWriter stdin = new PrintWriter(
                 new BufferedWriter(
@@ -87,13 +88,13 @@ public class Server implements ICloudServer, Cacheable {
      */
 
     public void prepare() {
-        if(status.getValue() >= ServerStatus.PREPARED.getValue()) {
+        if (status.getValue() >= ServerStatus.PREPARED.getValue()) {
             return;
         }
 
         int servId = 1;
-        if(ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
-            while(ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
+        if (ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
+            while (ServerManager.getInstance().getServer(template.getName() + "-" + servId) != null) {
                 servId++;
             }
         }
@@ -102,10 +103,10 @@ public class Server implements ICloudServer, Cacheable {
 
         RedstoneCloud.getLogger().debug(Translator.translate("cloud.server.prepare", name));
 
-        if(!template.isStaticServer()) directory = Path.of(RedstoneCloud.workingDir + "/tmp/" + name).toString();
+        if (!template.isStaticServer()) directory = Path.of(RedstoneCloud.workingDir + "/tmp/" + name).toString();
         else directory = Path.of(RedstoneCloud.workingDir + "/servers/" + name).toString();
 
-        if(!directory.endsWith("/")) directory += "/";
+        if (!directory.endsWith("/")) directory += "/";
 
         new File(directory).mkdir();
 
@@ -132,15 +133,16 @@ public class Server implements ICloudServer, Cacheable {
     }
 
     public void onExit() {
-        if(logger != null) logger.cancel();
+        if (logger != null) logger.cancel();
 
         RedstoneCloud.getLogger().debug(Translator.translate("cloud.server.exited", name));
 
         //copy log file to logs dir if server is not static
-        if(!getTemplate().isStaticServer() && type.logsPath() != null) {
+        if (!getTemplate().isStaticServer() && type.logsPath() != null) {
             synchronized (this) {
                 try {
-                    if(new File(directory + "/" + type.logsPath()).exists()) Files.copy(Paths.get(directory + "/" + type.logsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
+                    if (new File(directory + "/" + type.logsPath()).exists())
+                        Files.copy(Paths.get(directory + "/" + type.logsPath()), Paths.get("./logs/" + name + "_" + System.currentTimeMillis() + ".log"), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -162,7 +164,7 @@ public class Server implements ICloudServer, Cacheable {
 
     @Override
     public void start() {
-        if(status.getValue() != ServerStatus.PREPARED.getValue() && status.getValue() >= ServerStatus.STARTING.getValue()) {
+        if (status.getValue() != ServerStatus.PREPARED.getValue() && status.getValue() >= ServerStatus.STARTING.getValue()) {
             return;
         }
 
@@ -196,8 +198,8 @@ public class Server implements ICloudServer, Cacheable {
     @Override
     public void stop() {
         RedstoneCloud.getLogger().debug(Translator.translate("cloud.server.stopping", name));
-        if(logger != null) logger.cancel();
-        if(status.getValue() != ServerStatus.RUNNING.getValue()) {
+        if (logger != null) logger.cancel();
+        if (status.getValue() != ServerStatus.RUNNING.getValue()) {
             return;
         }
 

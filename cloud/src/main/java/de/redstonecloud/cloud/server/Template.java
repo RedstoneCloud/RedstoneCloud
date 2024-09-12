@@ -27,6 +27,10 @@ public class Template {
 
         runningServers = servers.length;
 
+        if (runningServers >= maxServers) {
+            return;
+        }
+
         if (runningServers < minServers) {
             create = true;
         }
@@ -41,11 +45,6 @@ public class Template {
 
         if (blocked == servers.length) {
             create = true;
-        }
-
-        if (runningServers >= maxServers) {
-            create = false;
-            return;
         }
 
         if (create) {

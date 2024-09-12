@@ -15,7 +15,7 @@ public class StartCommand extends Command {
 
     @Override
     protected void onCommand(String[] args) {
-        if(args.length == 0) {
+        if (args.length == 0) {
             Logger.getInstance().error("Usage: start <template> [count]");
             return;
         }
@@ -26,7 +26,7 @@ public class StartCommand extends Command {
             return;
         }
 
-        if(args.length == 2) {
+        if (args.length == 2) {
             for (int i = 1; i < Integer.parseInt(args[1]); i++) {
                 RedstoneCloud.getInstance().getServerManager().startServer(template);
             }

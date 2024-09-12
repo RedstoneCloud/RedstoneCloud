@@ -87,7 +87,7 @@ public class ServerLogger extends Thread {
 
     public void cancel() {
         running = false;
-        if(writerTask != null) writerTask.cancel();
+        if (writerTask != null) writerTask.cancel();
         server.setLogger(null);
         this.errorReader.cancel();
         try {
@@ -104,9 +104,9 @@ public class ServerLogger extends Thread {
     public void enableConsoleLogging() {
         //output all file content to console
         try {
-            Set<String> sent = new HashSet<>();
+            Set<String> sent = new HashSet<>(); // TODO: Handle
             BufferedReader reader = new BufferedReader(new FileReader(logFile.getPath()));
-            String line = "";
+            String line;
             while ((line = reader.readLine()) != null) {
                 Logger.getInstance().server(server.getName(), line);
                 sent.add(line);

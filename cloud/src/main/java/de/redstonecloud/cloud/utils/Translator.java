@@ -4,13 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import de.redstonecloud.cloud.RedstoneCloud;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 public class Translator {
-    private static JsonObject langFile;
+    private static final JsonObject langFile;
 
     static {
         try {
@@ -30,7 +29,7 @@ public class Translator {
         String value = langFile.get(key).getAsString();
 
         if (replace != null && replace.length > 0) {
-            value = MessageFormat.format(value, replace);
+            return MessageFormat.format(value, replace);
         }
 
         return value;

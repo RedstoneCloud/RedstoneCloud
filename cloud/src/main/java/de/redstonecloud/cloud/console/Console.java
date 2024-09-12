@@ -20,12 +20,12 @@ public class Console extends SimpleTerminalConsole {
     @Override
     protected void runCommand(String command) {
         boolean hasLogServer = server.getCurrentLogServer() != null;
-        if(!hasLogServer) {
+        if (!hasLogServer) {
             String cmd = command.split(" ")[0];
             String[] args = Utils.dropFirstString(command.split(" "));
             server.getCommandManager().executeCommand(cmd, args);
         } else {
-            if(command.toLowerCase().equals("_exit")) {
+            if (command.equalsIgnoreCase("_exit")) {
                 server.getCurrentLogServer().disableConsoleLogging();
                 server.setCurrentLogServer(null);
                 Logger.getInstance().info("Exited console");

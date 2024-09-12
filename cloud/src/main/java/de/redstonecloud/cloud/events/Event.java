@@ -9,17 +9,17 @@ public abstract class Event {
     }
 
     public boolean isCancelled() {
-        Preconditions.checkArgument(this instanceof CancellableEvent, "Event is not Cancellable");
+        Preconditions.checkArgument(this instanceof CancellableEvent, "Event is not cancellable");
         return this.cancelled;
     }
 
     public void setCancelled(boolean cancelled) {
-        Preconditions.checkArgument(this instanceof CancellableEvent, "Event is not Cancellable");
+        Preconditions.checkArgument(this instanceof CancellableEvent, "Event is not cancellable");
         this.cancelled = cancelled;
     }
 
     public void setCancelled() {
-        Preconditions.checkArgument(this instanceof CancellableEvent, "Event is not Cancellable");
+        Preconditions.checkArgument(this instanceof CancellableEvent, "Event is not cancellable");
         this.cancelled = true;
     }
 }

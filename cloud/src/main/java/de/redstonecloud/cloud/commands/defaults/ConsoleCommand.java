@@ -15,7 +15,7 @@ public class ConsoleCommand extends Command {
 
     @Override
     protected void onCommand(String[] args) {
-        if(args.length == 0) {
+        if (args.length == 0) {
             Logger.getInstance().error("Usage: console <server>");
             return;
         }

@@ -1,7 +1,5 @@
 package de.redstonecloud.cloud.events;
 
-import de.redstonecloud.cloud.logger.Logger;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;

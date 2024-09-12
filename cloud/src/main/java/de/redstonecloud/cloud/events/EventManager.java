@@ -3,6 +3,7 @@ package de.redstonecloud.cloud.events;
 import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.cloud.utils.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import lombok.Getter;
 
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -12,6 +13,7 @@ import java.util.function.Consumer;
  * Enables Plugins to subscribe to Events, either vanilla events already implemented
  * or custom ones which are loaded as part of a plugin.
  */
+@Getter
 public class EventManager {
 
     private final RedstoneCloud cloud;
@@ -40,7 +42,4 @@ public class EventManager {
         return eventHandler.handle(event);
     }
 
-    public ExecutorService getThreadedExecutor() {
-        return this.threadedExecutor;
-    }
 }

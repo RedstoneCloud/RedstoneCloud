@@ -16,13 +16,13 @@ public class BrokerHandler {
 
         Request.retrieveRequest(args[0]).ifPresent(request -> request.handle(message));
 
-        if(Request.retrieveRequest(args[0]).isEmpty()) {
-            switch(args[0].toLowerCase()) {
+        if (Request.retrieveRequest(args[0]).isEmpty()) {
+            switch (args[0].toLowerCase()) {
                 case "comm:login" -> {
                     ServerManager serverManager = RedstoneCloud.getInstance().getServerManager();
                     Server server = serverManager.getServer(message.getFrom());
 
-                    if(server == null || server.getStatus() != ServerStatus.STARTING) return;
+                    if (server == null || server.getStatus() != ServerStatus.STARTING) return;
                     server.setStatus(ServerStatus.RUNNING);
                     RedstoneCloud.getLogger().info(Translator.translate("cloud.server.ready", message.getFrom()));
                 }
