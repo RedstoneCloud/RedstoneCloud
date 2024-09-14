@@ -10,6 +10,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,12 +31,15 @@ public class NettyClient extends ChannelInitializer<Channel> {
     @Setter(AccessLevel.NONE)
     protected Channel channel;
 
+    protected EventLoopGroup worker = new NioEventLoopGroup();
+
     protected int port;
 
     public NettyClient(String clientId, IPacketRegistry packetRegistry, EventRegistry eventRegistry) {
         this.bootstrap = new Bootstrap()
                 .option(ChannelOption.AUTO_READ, true)
                 .channel(NioSocketChannel.class)
+                .group(this.worker)
                 .handler(this);
 
         this.clientId = clientId;
