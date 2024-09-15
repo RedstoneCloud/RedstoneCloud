@@ -6,6 +6,7 @@ import de.pierreschwang.nettypacket.handler.PacketChannelInboundHandler;
 import de.pierreschwang.nettypacket.handler.PacketDecoder;
 import de.pierreschwang.nettypacket.handler.PacketEncoder;
 import de.pierreschwang.nettypacket.registry.IPacketRegistry;
+import de.pierreschwang.nettypacket.response.RespondingPacket;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -18,8 +19,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @Getter
@@ -61,18 +64,32 @@ public class NettyServer extends ChannelInitializer<Channel> {
                         new PacketChannelInboundHandler(this.eventRegistry));
     }
 
+    public Optional<Channel> getChannel(String clientId) {
+        return Optional.ofNullable(this.channelCache.getOrDefault(clientId, null));
+    }
+
+    public Collection<Channel> getChannels(String idPattern) {
+        Pattern pattern = Pattern.compile(idPattern.replace("*", ".*")
+                .replace("?", "."));
+
+        return this.channelCache.entrySet().stream()
+                .filter(entry -> pattern.matcher(entry.getKey()).matches())
+                .map(Map.Entry::getValue)
+                .toList();
+    }
+
     public void sendPacket(String clientId, Packet packet) {
-        Optional.ofNullable(this.channelCache.getOrDefault(clientId, null))
+        this.getChannel(clientId)
                 .ifPresent(channel -> channel.writeAndFlush(packet));
     }
 
     public void sendPacketMulti(String idPattern, Packet packet) {
-        Pattern pattern = Pattern.compile(idPattern.replace("*", ".*")
-                .replace("?", "."));
+        this.getChannels(idPattern).forEach(channel -> channel.writeAndFlush(packet));
+    }
 
-        this.channelCache.entrySet().stream()
-                .filter(entry -> pattern.matcher(entry.getKey()).matches())
-                .map(Map.Entry::getValue)
-                .forEach(channel -> channel.writeAndFlush(packet));
+    public <T extends Packet> void sendPacket(String clientId, Packet packet, Consumer<T> callback, Class<T> clazz) {
+        RespondingPacket<T> respondingPacket = new RespondingPacket<>(packet, clazz, callback);
+
+        this.getChannel(clientId).ifPresent(respondingPacket::send);
     }
 }
