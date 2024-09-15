@@ -18,6 +18,6 @@ public class NettyEventHandler {
 
         this.server.getChannelCache().put(clientId, channel);
         channel.pipeline().addLast(new ClientDisconnectHandler(this.server, clientId));
-        System.out.println("[NETTY] Channel connected with clientId " + clientId);
+        //System.out.println("[NETTY] Channel connected with clientId " + clientId);
     }
 }

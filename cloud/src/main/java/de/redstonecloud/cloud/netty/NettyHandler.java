@@ -27,8 +27,6 @@ public class NettyHandler {
         String clientId = packet.getClientId();
         Channel channel = ctx.channel();
 
-        System.out.println(clientId);
-
         this.server.getChannelCache().put(clientId, channel);
         channel.pipeline().addLast(new ClientDisconnectHandler(this.server, clientId));
 
@@ -51,8 +49,6 @@ public class NettyHandler {
 
             BestTemplateResultPacket resp = new BestTemplateResultPacket();
             resp.setServer(name);
-
-            System.out.println(name);
 
             responder.respond(resp);
         }

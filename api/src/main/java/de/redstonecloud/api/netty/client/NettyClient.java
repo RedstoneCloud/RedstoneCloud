@@ -6,6 +6,7 @@ import de.pierreschwang.nettypacket.handler.PacketChannelInboundHandler;
 import de.pierreschwang.nettypacket.handler.PacketDecoder;
 import de.pierreschwang.nettypacket.handler.PacketEncoder;
 import de.pierreschwang.nettypacket.registry.IPacketRegistry;
+import de.pierreschwang.nettypacket.response.RespondingPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -18,6 +19,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import de.redstonecloud.api.netty.packet.communication.ClientAuthPacket;
+
+import java.util.function.Consumer;
 
 @Getter
 @Setter
@@ -65,5 +68,10 @@ public class NettyClient extends ChannelInitializer<Channel> {
 
     public void sendPacket(Packet packet) {
         this.channel.writeAndFlush(packet);
+    }
+
+    public <T extends Packet> void sendPacket(Packet packet, Consumer<T> callback, Class<T> clazz) {
+        RespondingPacket<T> respondingPacket = new RespondingPacket<>(packet, clazz, callback);
+        respondingPacket.send(this.channel);
     }
 }

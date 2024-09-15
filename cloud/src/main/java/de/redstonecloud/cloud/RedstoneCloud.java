@@ -80,7 +80,7 @@ public class RedstoneCloud {
         try {
             System.out.println(Translator.translate("cloud.startup.redis"));
             Broker broker = new Broker("cloud", "cloud");
-            //broker.listen("cloud", BrokerHandler::handle);
+            broker.listen("cloud", BrokerHandler::handle);
         } catch (Exception e) {
             throw new RuntimeException("Cannot connect to Redis: " + e);
         }
