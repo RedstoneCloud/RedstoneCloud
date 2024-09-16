@@ -8,10 +8,7 @@ import de.pierreschwang.nettypacket.handler.PacketEncoder;
 import de.pierreschwang.nettypacket.registry.IPacketRegistry;
 import de.pierreschwang.nettypacket.response.RespondingPacket;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -30,6 +27,8 @@ import java.util.regex.Pattern;
 @Accessors(chain = true)
 public class NettyServer extends ChannelInitializer<Channel> {
     protected final ServerBootstrap bootstrap;
+    protected Channel serverChannel;
+
     protected final IPacketRegistry packetRegistry;
     protected final EventRegistry eventRegistry;
 
@@ -53,7 +52,24 @@ public class NettyServer extends ChannelInitializer<Channel> {
     }
 
     public void bind() {
-        this.bootstrap.bind("127.0.0.1", this.port);
+        try {
+            ChannelFuture channelFuture = this.bootstrap.bind("127.0.0.1", this.port).sync();
+
+            this.serverChannel = channelFuture.channel();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void shutdown() {
+        try {
+            this.serverChannel.closeFuture().sync();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            this.boss.shutdownGracefully();
+            this.worker.shutdownGracefully();
+        }
     }
 
     @Override
