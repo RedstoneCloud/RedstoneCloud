@@ -1,6 +1,8 @@
 package de.redstonecloud.cloud.server;
 
 import com.google.common.net.HostAndPort;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.redstonecloud.api.components.ICloudServer;
 import de.redstonecloud.api.components.ServerStatus;
@@ -22,6 +24,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Builder
 @Getter
@@ -30,8 +36,7 @@ public class Server implements ICloudServer, Cacheable {
     public String name;
     public int port;
     @Builder.Default
-    //TODO: ADD PLAYER CLASS
-    public Long2ObjectOpenHashMap<String> players = new Long2ObjectOpenHashMap<>();
+    public List<String> players = new ArrayList<>();
     @Builder.Default
     private ServerStatus status = ServerStatus.NONE;
     public ServerType type;
@@ -52,6 +57,7 @@ public class Server implements ICloudServer, Cacheable {
         obj.addProperty("type", type.name());
         obj.addProperty("port", port);
         obj.addProperty("proxy", type.isProxy());
+        obj.add("playerUuids", new Gson().fromJson(new Gson().toJson(players), JsonArray.class));
 
         return obj.toString();
     }

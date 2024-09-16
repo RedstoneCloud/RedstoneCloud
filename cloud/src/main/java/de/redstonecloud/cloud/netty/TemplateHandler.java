@@ -2,10 +2,11 @@ package de.redstonecloud.cloud.netty;
 
 import de.pierreschwang.nettypacket.event.PacketSubscriber;
 import de.pierreschwang.nettypacket.io.Responder;
-import de.pierreschwang.nettypacket.response.RespondingPacket;
 import de.redstonecloud.api.components.ServerStatus;
 import de.redstonecloud.api.netty.packet.template.BestTemplateResultPacket;
 import de.redstonecloud.api.netty.packet.template.GetBestTemplatePacket;
+import de.redstonecloud.api.netty.packet.template.ServerStartedPacket;
+import de.redstonecloud.api.netty.packet.template.StartServerPacket;
 import de.redstonecloud.api.netty.server.NettyServer;
 import de.redstonecloud.api.netty.server.handler.ClientDisconnectHandler;
 import de.redstonecloud.cloud.RedstoneCloud;
@@ -19,25 +20,8 @@ import lombok.RequiredArgsConstructor;
 import de.redstonecloud.api.netty.packet.communication.ClientAuthPacket;
 
 @RequiredArgsConstructor
-public class NettyHandler {
+public class TemplateHandler {
     protected final NettyServer server;
-
-    @PacketSubscriber
-    public void on(ClientAuthPacket packet, ChannelHandlerContext ctx) {
-        String clientId = packet.getClientId();
-        Channel channel = ctx.channel();
-
-        this.server.getChannelCache().put(clientId, channel);
-        channel.pipeline().addLast(new ClientDisconnectHandler(this.server, clientId));
-
-        ServerManager serverManager = RedstoneCloud.getInstance().getServerManager();
-        Server server = serverManager.getServer(clientId);
-
-        if (server == null || server.getStatus() != ServerStatus.STARTING) return;
-        server.setStatus(ServerStatus.RUNNING);
-        RedstoneCloud.getLogger().info(Translator.translate("cloud.server.ready", clientId));
-
-    }
 
     @PacketSubscriber
     public void on(GetBestTemplatePacket packet, ChannelHandlerContext ctx, Responder responder) {
@@ -52,5 +36,12 @@ public class NettyHandler {
 
             responder.respond(resp);
         }
+    }
+
+    @PacketSubscriber
+    public void on(StartServerPacket packet, Responder r) {
+        Template t = ServerManager.getInstance().getTemplate(packet.getTemplate());
+        Server s = ServerManager.getInstance().startServer(t);
+        r.respond(new ServerStartedPacket(s.name));
     }
 }
