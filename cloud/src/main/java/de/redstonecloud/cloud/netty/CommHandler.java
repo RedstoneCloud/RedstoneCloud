@@ -31,6 +31,5 @@ public class CommHandler {
         if (server == null || server.getStatus() != ServerStatus.STARTING) return;
         server.setStatus(ServerStatus.RUNNING);
         RedstoneCloud.getLogger().info(Translator.translate("cloud.server.ready", clientId));
-
     }
 }

@@ -30,7 +30,6 @@ import de.redstonecloud.api.redis.cache.Cache;
 import lombok.SneakyThrows;
 import de.redstonecloud.api.netty.NettyHelper;
 import de.redstonecloud.api.netty.server.NettyServer;
-import de.redstonecloud.api.netty.server.handler.NettyEventHandler;
 import org.apache.commons.io.FileUtils;
 import redis.embedded.RedisServer;
 
@@ -143,7 +142,6 @@ public class RedstoneCloud {
         this.scheduler = new TaskScheduler(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors()));
 
         this.nettyServer = new NettyServer(NettyHelper.constructRegistry(), new EventRegistry());
-        this.nettyServer.getEventRegistry().registerEvents(new NettyEventHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new CommHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new TemplateHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new PlayerHandler(this.nettyServer));
@@ -205,6 +203,7 @@ public class RedstoneCloud {
         this.stopped = true;
         running = false;
         this.scheduler.stopScheduler();
+        this.nettyServer.shutdown();
 
         try {
             Thread.sleep(200);
