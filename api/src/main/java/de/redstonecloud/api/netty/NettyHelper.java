@@ -3,6 +3,7 @@ package de.redstonecloud.api.netty;
 import de.pierreschwang.nettypacket.registry.IPacketRegistry;
 import de.pierreschwang.nettypacket.registry.SimplePacketRegistry;
 import de.redstonecloud.api.netty.packet.communication.ClientAuthPacket;
+import de.redstonecloud.api.netty.packet.template.BestTemplateResultPacket;
 import de.redstonecloud.api.netty.packet.template.GetBestTemplatePacket;
 
 public class NettyHelper {
@@ -13,6 +14,7 @@ public class NettyHelper {
         try {
             registry.registerPacket(ClientAuthPacket.NETWORK_ID, ClientAuthPacket.class);
             registry.registerPacket(GetBestTemplatePacket.NETWORK_ID, GetBestTemplatePacket.class);
+            registry.registerPacket(BestTemplateResultPacket.NETWORK_ID, BestTemplateResultPacket.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

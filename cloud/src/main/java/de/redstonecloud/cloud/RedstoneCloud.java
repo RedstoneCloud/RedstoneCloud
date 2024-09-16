@@ -8,6 +8,7 @@ import de.redstonecloud.api.encryption.cache.KeyCache;
 import de.redstonecloud.cloud.config.CloudConfig;
 import de.redstonecloud.cloud.events.EventManager;
 import de.redstonecloud.cloud.logger.Logger;
+import de.redstonecloud.cloud.netty.NettyHandler;
 import de.redstonecloud.cloud.plugin.PluginManager;
 import de.redstonecloud.cloud.scheduler.task.Task;
 import de.redstonecloud.cloud.server.ServerLogger;
@@ -307,6 +308,7 @@ public class RedstoneCloud {
 
         this.nettyServer = new NettyServer(NettyHelper.constructRegistry(), new EventRegistry());
         this.nettyServer.getEventRegistry().registerEvents(new NettyEventHandler(this.nettyServer));
+        this.nettyServer.getEventRegistry().registerEvents(new NettyHandler(this.nettyServer));
         this.nettyServer.setPort(51123).bind();
 
         PublicKey publicKey = KeyManager.init();
