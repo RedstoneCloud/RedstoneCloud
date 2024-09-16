@@ -307,7 +307,6 @@ public class RedstoneCloud {
         this.scheduler = new TaskScheduler(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors()));
 
         this.nettyServer = new NettyServer(NettyHelper.constructRegistry(), new EventRegistry());
-        this.nettyServer.getEventRegistry().registerEvents(new NettyEventHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new NettyHandler(this.nettyServer));
         this.nettyServer.setPort(51123).bind();
 
