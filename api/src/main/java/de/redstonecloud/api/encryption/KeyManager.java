@@ -29,22 +29,16 @@ public class KeyManager {
         }
     }
 
-    public static String encrypt(String message, PublicKey key) {
+    public static byte[] encrypt(byte[] message, PublicKey key) {
         Preconditions.checkNotNull(key, "Encryption keys not initialized");
 
-        byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
-        byte[] encryptedBytes = doFinal(messageBytes, Cipher.ENCRYPT_MODE, key);
-
-        return B64.encode(encryptedBytes);
+        return doFinal(message, Cipher.ENCRYPT_MODE, key);
     }
 
-    public static String decrypt(String message) {
+    public static byte[] decrypt(byte[] message) {
         Preconditions.checkNotNull(privateKey, "Encryption keys not initialized");
 
-        byte[] encryptedBytes = B64.decode(message);
-        byte[] messageBytes = doFinal(encryptedBytes, Cipher.DECRYPT_MODE, privateKey);
-
-        return new String(messageBytes, StandardCharsets.UTF_8);
+        return doFinal(message, Cipher.DECRYPT_MODE, privateKey);
     }
 
     private static byte[] doFinal(byte[] message, int mode, AsymmetricKey key) {
