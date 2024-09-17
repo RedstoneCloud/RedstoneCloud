@@ -10,6 +10,8 @@ public interface ICloudPlayer extends Nameable {
 
     ICloudServer getConnectedServer();
 
+    String getUUID();
+
     void sendMessage(String message);
 
     void connect(String server);
