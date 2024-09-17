@@ -43,7 +43,9 @@ public class EncryptedPacket extends Packet {
 
         while (buffer.isReadable()) {
             int keyLength = buffer.readInt();
-            byte[] encodedKey = buffer.readBytes(keyLength).array();
+
+            byte[] encodedKey = new byte[keyLength];
+            buffer.readBytes(encodedKey);
 
             int packetBufferLength = buffer.readInt();
             ByteBuf packetBuf = buffer.readBytes(packetBufferLength);
@@ -52,7 +54,9 @@ public class EncryptedPacket extends Packet {
                 continue;
             }
 
-            byte[] encryptedBuffer = packetBuf.array();
+            byte[] encryptedBuffer = new byte[packetBuf.readableBytes()];
+            packetBuf.readBytes(encryptedBuffer);
+
             PacketBuffer packetBuffer = this.decryptBuffer(encryptedBuffer);
 
             try {
@@ -87,12 +91,13 @@ public class EncryptedPacket extends Packet {
     }
 
     protected byte[] encryptBuffer(PublicKey key, PacketBuffer packetBuffer) {
-        byte[] arr = packetBuffer.array();
+        byte[] arr = new byte[packetBuffer.readableBytes()];
+        packetBuffer.readBytes(arr);
         return KeyManager.encrypt(arr, key);
     }
 
     protected PacketBuffer decryptBuffer(byte[] arr) {
         byte[] bufferArray = KeyManager.decrypt(arr);
-        return new PacketBuffer(Unpooled.wrappedBuffer(arr));
+        return new PacketBuffer(Unpooled.wrappedBuffer(bufferArray));
     }
 }
