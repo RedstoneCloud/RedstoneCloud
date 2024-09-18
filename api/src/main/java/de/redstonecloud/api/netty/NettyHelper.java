@@ -6,6 +6,9 @@ import de.redstonecloud.api.netty.packet.EncryptedPacket;
 import de.redstonecloud.api.netty.packet.communication.ClientAuthPacket;
 import de.redstonecloud.api.netty.packet.player.PlayerConnectPacket;
 import de.redstonecloud.api.netty.packet.player.PlayerDisconnectPacket;
+import de.redstonecloud.api.netty.packet.server.RemoveServerPacket;
+import de.redstonecloud.api.netty.packet.server.ServerAction;
+import de.redstonecloud.api.netty.packet.server.ServerActionRequest;
 import de.redstonecloud.api.netty.packet.template.*;
 
 import lombok.Getter;
@@ -34,6 +37,10 @@ public class NettyHelper {
 
             registry.registerPacket(PlayerConnectPacket.NETWORK_ID, PlayerConnectPacket.class);
             registry.registerPacket(PlayerDisconnectPacket.NETWORK_ID, PlayerDisconnectPacket.class);
+
+            registry.registerPacket(RemoveServerPacket.NETWORK_ID, RemoveServerPacket.class);
+            registry.registerPacket(ServerAction.NETWORK_ID, ServerAction.class);
+            registry.registerPacket(ServerActionRequest.NETWORK_ID, ServerActionRequest.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
