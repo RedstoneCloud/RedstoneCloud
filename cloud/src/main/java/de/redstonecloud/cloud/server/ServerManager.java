@@ -133,7 +133,7 @@ public class ServerManager {
         RedstoneCloud cloud = RedstoneCloud.getInstance();
         cloud.getScheduler().scheduleDelayedTask(() -> {
             srv.start();
-            RedstoneCloud.getInstance().getEventManager().callEvent(new ServerStartEvent(srv.getName()));
+            RedstoneCloud.getInstance().getEventManager().callEvent(new ServerStartEvent(srv));
         }, TimeUnit.SECONDS, 1);
 
         return srv;

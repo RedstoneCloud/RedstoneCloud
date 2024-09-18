@@ -19,7 +19,6 @@ public abstract class Plugin {
     private Logger logger;
     private File pluginFile;
     private File dataFolder;
-    private File configFile;
     private boolean initialized = false;
 
     public Plugin() {
@@ -37,7 +36,6 @@ public abstract class Plugin {
         if (!this.dataFolder.exists()) {
             this.dataFolder.mkdirs();
         }
-        this.configFile = new File(this.dataFolder, "config.yml");
     }
 
     public void onLoad() {

@@ -6,6 +6,9 @@ import de.redstonecloud.api.netty.packet.player.PlayerConnectPacket;
 import de.redstonecloud.api.netty.packet.player.PlayerDisconnectPacket;
 import de.redstonecloud.api.netty.server.NettyServer;
 import de.redstonecloud.cloud.RedstoneCloud;
+import de.redstonecloud.cloud.events.defaults.PlayerConnectEvent;
+import de.redstonecloud.cloud.events.defaults.PlayerDisconnectEvent;
+import de.redstonecloud.cloud.events.defaults.PlayerTransferEvent;
 import de.redstonecloud.cloud.player.CloudPlayer;
 import de.redstonecloud.cloud.player.PlayerManager;
 import de.redstonecloud.cloud.server.Server;
@@ -29,10 +32,14 @@ public class PlayerHandler {
                         .build();
 
                 PlayerManager.getInstance().addPlayer(p);
+                RedstoneCloud.getInstance().getEventManager().callEvent(new PlayerConnectEvent(p, server));
             }
 
             if(server.getType().isProxy()) p.setConnectedNetwork(server);
-            else p.setConnectedServer(server);
+            else {
+                RedstoneCloud.getInstance().getEventManager().callEvent(new PlayerTransferEvent(p, (Server) p.getConnectedServer(), server));
+                p.setConnectedServer(server);
+            }
 
             RedstoneCloud.getLogger().info("Player " + p.getName() + " switched to " + server.getName());
         }
@@ -44,6 +51,7 @@ public class PlayerHandler {
         if (server != null && server.getType().isProxy()) {
             CloudPlayer p = PlayerManager.getInstance().getPlayer(packet.getUuid());
             if (p != null) {
+                RedstoneCloud.getInstance().getEventManager().callEvent(new PlayerDisconnectEvent(p, (Server) p.getConnectedNetwork(), (Server) p.getConnectedServer()));
                 p.setConnectedServer(null);
                 p.setConnectedNetwork(null);
             }

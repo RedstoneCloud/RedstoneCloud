@@ -3,7 +3,6 @@ package de.redstonecloud.cloud.config;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import de.redstonecloud.cloud.RedstoneCloud;
-import lombok.Getter;
 
 import java.io.IOException;
 import java.nio.file.Files;

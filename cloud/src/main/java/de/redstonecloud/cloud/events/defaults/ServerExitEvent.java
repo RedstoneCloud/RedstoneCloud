@@ -5,10 +5,10 @@ import de.redstonecloud.cloud.server.Server;
 import lombok.Getter;
 
 @Getter
-public class ServerStartEvent extends Event {
+public class ServerExitEvent extends Event {
     private final Server server;
 
-    public ServerStartEvent(Server srv) {
+    public ServerExitEvent(Server srv) {
         this.server = srv;
     }
 }

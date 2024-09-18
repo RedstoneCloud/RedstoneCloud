@@ -9,10 +9,19 @@ import de.redstonecloud.api.netty.NettyHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.DecoderException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.security.PublicKey;
 import java.util.Arrays;
 
+@Getter
+@Setter
+@Accessors(chain = true)
+@NoArgsConstructor
 public class EncryptedPacket extends Packet {
     public static int NETWORK_ID = -999;
 

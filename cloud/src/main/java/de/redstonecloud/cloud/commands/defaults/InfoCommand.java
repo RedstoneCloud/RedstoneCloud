@@ -28,7 +28,7 @@ public class InfoCommand extends Command {
         Logger.getInstance().info("== SERVER INFO: " + server.getName() + " ==");
         Logger.getInstance().info("Server Name: " + server.getName());
         Logger.getInstance().info("Server Template: " + server.getTemplate().getName());
-        Logger.getInstance().info("Server Type: " + server.getType());
+        Logger.getInstance().info("Server Type: " + server.getType().name());
         Logger.getInstance().info("Server Status: " + server.getStatus());
         Logger.getInstance().info("Server Port: " + server.getPort());
     }

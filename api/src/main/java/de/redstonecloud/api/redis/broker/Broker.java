@@ -46,7 +46,11 @@ public class Broker {
         int port = Integer.parseInt(System.getenv("REDIS_PORT") != null ? System.getenv("REDIS_PORT") : System.getProperty("redis.port"));
         this.publisher = new Jedis("127.0.0.1", port);
         this.subscriber = new Jedis("127.0.0.1", port);
-        new Thread(() -> this.subscriber.subscribe(new BrokerJedisPubSub(), routes)).start();
+        new Thread(() -> {
+            try {
+                this.subscriber.subscribe(new BrokerJedisPubSub(), routes);
+            } catch (Exception e) {}
+        }).start();
     }
 
     public void publish(Message message) {

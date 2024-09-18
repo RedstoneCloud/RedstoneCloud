@@ -1,6 +1,5 @@
 package de.redstonecloud.cloud.player;
 
-import de.redstonecloud.api.redis.cache.Cache;
 import lombok.Getter;
 
 import java.util.HashMap;

@@ -4,7 +4,6 @@ import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.cloud.commands.Command;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.server.Template;
-import org.apache.logging.log4j.core.pattern.NotANumber;
 
 public class StartCommand extends Command {
     public int argCount = 1;

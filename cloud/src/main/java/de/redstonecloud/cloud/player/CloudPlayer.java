@@ -1,6 +1,8 @@
 package de.redstonecloud.cloud.player;
 
 import com.google.common.net.HostAndPort;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import de.redstonecloud.api.components.ICloudPlayer;
 import de.redstonecloud.api.components.ICloudServer;
 import de.redstonecloud.api.redis.cache.Cacheable;
@@ -17,6 +19,8 @@ public class CloudPlayer implements ICloudPlayer, Cacheable {
     private Server network;
     private Server server;
     protected String uuid;
+    @Builder.Default
+    public JsonElement customData = new JsonParser().parse("{}");
 
     @Override
     public String toString() {
@@ -25,7 +29,8 @@ public class CloudPlayer implements ICloudPlayer, Cacheable {
                 .put("uuid", uuid)
                 .put("address", address.toString())
                 .put("network", network != null ? network.getName() : "null")
-                .put("server", server != null ? server.getName() : "null");
+                .put("server", server != null ? server.getName() : "null")
+                .put("customData", customData.toString());
 
         return obj.toString();
     }

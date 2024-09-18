@@ -2,7 +2,6 @@ package de.redstonecloud.cloud.commands.defaults;
 
 import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.cloud.commands.Command;
-import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.server.Server;
 
 import java.util.Comparator;

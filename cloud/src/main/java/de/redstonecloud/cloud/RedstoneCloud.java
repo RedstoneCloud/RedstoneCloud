@@ -1,7 +1,5 @@
 package de.redstonecloud.cloud;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import de.pierreschwang.nettypacket.event.EventRegistry;
 import de.redstonecloud.api.encryption.KeyManager;
 import de.redstonecloud.api.encryption.cache.KeyCache;
@@ -15,7 +13,6 @@ import de.redstonecloud.cloud.player.PlayerManager;
 import de.redstonecloud.cloud.plugin.PluginManager;
 import de.redstonecloud.cloud.scheduler.task.Task;
 import de.redstonecloud.cloud.server.ServerLogger;
-import de.redstonecloud.cloud.broker.BrokerHandler;
 import de.redstonecloud.cloud.commands.CommandManager;
 import de.redstonecloud.cloud.console.Console;
 import de.redstonecloud.cloud.scheduler.TaskScheduler;
@@ -58,6 +55,8 @@ public class RedstoneCloud {
     public static boolean running = false;
     private static RedisServer redisServer;
 
+    @Getter private static Broker broker;
+
     @SneakyThrows
     public static void main(String[] args) {
         workingDir = System.getProperty("user.dir");
@@ -82,8 +81,7 @@ public class RedstoneCloud {
 
         try {
             System.out.println(Translator.translate("cloud.startup.redis"));
-            Broker broker = new Broker("cloud", "cloud");
-            broker.listen("cloud", BrokerHandler::handle);
+            broker = new Broker("cloud", "cloud");
         } catch (Exception e) {
             throw new RuntimeException("Cannot connect to Redis: " + e);
         }

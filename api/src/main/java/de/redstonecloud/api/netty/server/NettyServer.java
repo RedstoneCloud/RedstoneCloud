@@ -63,7 +63,7 @@ public class NettyServer extends ChannelInitializer<Channel> {
 
     public void shutdown() {
         try {
-            this.serverChannel.closeFuture().sync();
+            this.serverChannel.close().sync();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {

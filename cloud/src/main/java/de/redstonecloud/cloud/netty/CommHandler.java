@@ -5,6 +5,7 @@ import de.redstonecloud.api.components.ServerStatus;
 import de.redstonecloud.api.netty.server.NettyServer;
 import de.redstonecloud.api.netty.server.handler.ClientDisconnectHandler;
 import de.redstonecloud.cloud.RedstoneCloud;
+import de.redstonecloud.cloud.events.defaults.ServerReadyEvent;
 import de.redstonecloud.cloud.server.Server;
 import de.redstonecloud.cloud.server.ServerManager;
 import de.redstonecloud.cloud.utils.Translator;
@@ -31,5 +32,6 @@ public class CommHandler {
         if (server == null || server.getStatus() != ServerStatus.STARTING) return;
         server.setStatus(ServerStatus.RUNNING);
         RedstoneCloud.getLogger().info(Translator.translate("cloud.server.ready", clientId));
+        RedstoneCloud.getInstance().getEventManager().callEvent(new ServerReadyEvent(server));
     }
 }

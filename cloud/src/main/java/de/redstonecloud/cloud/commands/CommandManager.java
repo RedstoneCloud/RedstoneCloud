@@ -11,7 +11,6 @@ public class CommandManager {
     @Getter
     private Map<String,Command> commandMap = new HashMap<>();
     private final Set<Command> commands;
-    private String message;
 
     public CommandManager() {
         this.commands = new HashSet<Command>();

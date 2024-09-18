@@ -6,12 +6,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.redstonecloud.api.components.ICloudServer;
 import de.redstonecloud.api.components.ServerStatus;
+import de.redstonecloud.api.netty.packet.server.RemoveServerPacket;
 import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.cloud.config.CloudConfig;
-import de.redstonecloud.cloud.logger.Logger;
+import de.redstonecloud.cloud.events.defaults.ServerExitEvent;
+import de.redstonecloud.cloud.scheduler.task.Task;
 import de.redstonecloud.cloud.utils.Translator;
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,10 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Builder
 @Getter
@@ -143,6 +140,16 @@ public class Server implements ICloudServer, Cacheable {
 
         RedstoneCloud.getLogger().debug(Translator.translate("cloud.server.exited", name));
 
+        ServerType[] proxyTypes = Arrays.stream(ServerManager.getInstance().getTypes().values().toArray(new ServerType[0])).filter(t -> t.isProxy()).toArray(ServerType[]::new);
+
+        RemoveServerPacket rsp = new RemoveServerPacket().setServer(this.name);
+
+        for(ServerType type : proxyTypes) {
+            for(Server ser : ServerManager.getInstance().getServersByType(type)) {
+                RedstoneCloud.getInstance().getNettyServer().sendPacket(ser.getName().toUpperCase(), rsp);
+            }
+        }
+
         //copy log file to logs dir if server is not static
         if (!getTemplate().isStaticServer() && type.logsPath() != null) {
             synchronized (this) {
@@ -166,6 +173,7 @@ public class Server implements ICloudServer, Cacheable {
         status = ServerStatus.STOPPED;
         resetCache();
         ServerManager.getInstance().remove(this);
+        RedstoneCloud.getInstance().getEventManager().callEvent(new ServerExitEvent(this));
     }
 
     @Override
@@ -222,9 +230,16 @@ public class Server implements ICloudServer, Cacheable {
                 try {
                     process.waitFor();
 
-                    if (process.isAlive()) {
-                        process.destroyForcibly();
-                    }
+                    RedstoneCloud.getInstance().getScheduler().scheduleDelayedTask(new Task() {
+                        @Override
+                        protected void onRun(long currentMillis) {
+                            if (process.isAlive()) {
+                                process.destroyForcibly();
+                                RedstoneCloud.getLogger().debug(name + " didn't stop in time. killing process...");
+                            }
+                        }
+                    }, 5000);
+
                     process.destroy();
                     status = ServerStatus.STOPPED;
                 } catch (InterruptedException e) {
