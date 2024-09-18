@@ -8,6 +8,7 @@ import de.redstonecloud.cloud.events.EventManager;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.netty.CommHandler;
 import de.redstonecloud.cloud.netty.PlayerHandler;
+import de.redstonecloud.cloud.netty.ServerHandler;
 import de.redstonecloud.cloud.netty.TemplateHandler;
 import de.redstonecloud.cloud.player.PlayerManager;
 import de.redstonecloud.cloud.plugin.PluginManager;
@@ -143,6 +144,7 @@ public class RedstoneCloud {
         this.nettyServer.getEventRegistry().registerEvents(new CommHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new TemplateHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new PlayerHandler(this.nettyServer));
+        this.nettyServer.getEventRegistry().registerEvents(new ServerHandler(this.nettyServer));
         this.nettyServer.setPort(51123).bind();
 
         PublicKey publicKey = KeyManager.init();
