@@ -66,7 +66,7 @@ public class RedstoneCloud {
 
         if (!new File("./.cloud.setup").exists()) Utils.setup();
 
-        usingIntRedis = CloudConfig.getCfg().get("custom_redis").getAsBoolean();
+        usingIntRedis = !CloudConfig.getCfg().get("custom_redis").getAsBoolean();
         System.setProperty("redis.port", CloudConfig.getCfg().get("redis_port").getAsString());
         System.setProperty("redis.bind", CloudConfig.getCfg().get("redis_bind").getAsString());
 
