@@ -43,6 +43,7 @@ public class Broker {
     }
 
     private void initJedis(String... routes) {
+        String addr = System.getenv("REDIS_IP") != null ? System.getenv("REDIS_IP") : System.getProperty("redis.bind");
         int port = Integer.parseInt(System.getenv("REDIS_PORT") != null ? System.getenv("REDIS_PORT") : System.getProperty("redis.port"));
         this.publisher = new Jedis("127.0.0.1", port);
         this.subscriber = new Jedis("127.0.0.1", port);

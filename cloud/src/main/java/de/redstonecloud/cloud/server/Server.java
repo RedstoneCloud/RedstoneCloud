@@ -190,7 +190,8 @@ public class Server implements ICloudServer, Cacheable {
         ).directory(new File(directory));
 
         //TODO: CHANGE IP IN CLUSTER MODE
-        processBuilder.environment().put("REDIS_IP", "127.0.0.1");
+        processBuilder.environment().put("NETTY_PORT", CloudConfig.getCfg().get("netty_port").getAsString());
+        processBuilder.environment().put("REDIS_IP", CloudConfig.getCfg().get("redis_bind").getAsString());
         processBuilder.environment().put("REDIS_PORT", String.valueOf(CloudConfig.getCfg().get("redis_port").getAsInt()));
         processBuilder.environment().put("BRIDGE_CFG", CloudConfig.getCfg().get("bridge").getAsJsonObject().toString());
 

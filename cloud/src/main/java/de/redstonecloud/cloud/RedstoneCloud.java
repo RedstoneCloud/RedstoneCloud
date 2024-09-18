@@ -10,6 +10,7 @@ import de.redstonecloud.cloud.netty.CommHandler;
 import de.redstonecloud.cloud.netty.PlayerHandler;
 import de.redstonecloud.cloud.netty.ServerHandler;
 import de.redstonecloud.cloud.netty.TemplateHandler;
+import de.redstonecloud.cloud.player.CloudPlayer;
 import de.redstonecloud.cloud.player.PlayerManager;
 import de.redstonecloud.cloud.plugin.PluginManager;
 import de.redstonecloud.cloud.scheduler.task.Task;
@@ -55,6 +56,7 @@ public class RedstoneCloud {
     @Getter
     public static boolean running = false;
     private static RedisServer redisServer;
+    private static boolean usingIntRedis;
 
     @Getter private static Broker broker;
 
@@ -64,17 +66,21 @@ public class RedstoneCloud {
 
         if (!new File("./.cloud.setup").exists()) Utils.setup();
 
-        try {
-            redisServer = RedisServer.builder()
-                    .port(CloudConfig.getCfg().get("redis_port").getAsInt())
-                    //TODO: MOVE TO CONFIG
-                    .setting("bind 0.0.0.0")
-                    .build();
-            System.setProperty("redis.port", CloudConfig.getCfg().get("redis_port").getAsString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        usingIntRedis = CloudConfig.getCfg().get("custom_redis").getAsBoolean();
+        System.setProperty("redis.port", CloudConfig.getCfg().get("redis_port").getAsString());
+        System.setProperty("redis.bind", CloudConfig.getCfg().get("redis_bind").getAsString());
+
+        if(usingIntRedis) {
+            try {
+                redisServer = RedisServer.builder()
+                        .port(CloudConfig.getCfg().get("redis_port").getAsInt())
+                        .setting("bind " + CloudConfig.getCfg().get("redis_bind").getAsString())
+                        .build();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            redisServer.start();
         }
-        redisServer.start();
 
         Thread.sleep(2000);
 
@@ -145,7 +151,7 @@ public class RedstoneCloud {
         this.nettyServer.getEventRegistry().registerEvents(new TemplateHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new PlayerHandler(this.nettyServer));
         this.nettyServer.getEventRegistry().registerEvents(new ServerHandler(this.nettyServer));
-        this.nettyServer.setPort(51123).bind();
+        this.nettyServer.setPort(CloudConfig.getCfg().get("netty_port").getAsInt()).bind();
 
         PublicKey publicKey = KeyManager.init();
         this.keyCache = new KeyCache();
@@ -215,7 +221,7 @@ public class RedstoneCloud {
             this.eventManager.getThreadedExecutor().shutdown();
             logger.info(Translator.translate("cloud.shutdown.complete"));
             Broker.get().shutdown();
-            redisServer.stop();
+            if(usingIntRedis) redisServer.stop();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

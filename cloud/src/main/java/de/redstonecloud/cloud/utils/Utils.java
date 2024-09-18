@@ -87,6 +87,9 @@ public class Utils {
 
         boolean redis = true;
         int intRedisPort = 6379;
+        int nettyPort = 51123;
+        String redisBind = "127.0.0.1";
+        boolean buildInRedis = true;
         boolean downloadRedis = true;
 
         l.setup("RC Setup", "§cRedstoneCloud comes with a built-in redis instance. Would you like to use it? §3[y/n] §a(default: y): ");
@@ -94,6 +97,8 @@ public class Utils {
         if (result.toLowerCase().contains("n")) redis = false;
 
         if (redis) {
+            l.setup("RC Setup", "§cPlease provide an ip redis should bind to. §3[127.0.0.1, 0.0.0.0] §a(default: 127.0.0.1): ");
+            redisBind = input.nextLine();
             l.setup("RC Setup", "§cPlease provide a redis port you want to use. §3[number] §a(default: 6379): ");
             try {
                 intRedisPort = input.nextInt();
@@ -111,7 +116,21 @@ public class Utils {
 
             //TODO: DOWNLOAD REDIS
         } else {
-            //TODO: CUSTOM REDIS INSTANCE
+            l.setup("RC Setup", "§cPlease provide your redis instance ip address. §3[127.0.0.1, 0.0.0.0, ...] §a(default: 127.0.0.1): ");
+            redisBind = input.nextLine();
+            l.setup("RC Setup", "§cPlease provide the port of your redis instance. §3[number] §a(default: 6379): ");
+            try {
+                intRedisPort = input.nextInt();
+            } catch (Exception e) {
+                l.setup("RC Setup", "§eProvided invalid port, using default port.", true);
+            }
+        }
+
+        l.setup("RC Setup", "§cPlease provide a netty port you want to use. §3[number] §a(default: 51123): ");
+        try {
+            nettyPort = input.nextInt();
+        } catch (Exception e) {
+            l.setup("RC Setup", "§eProvided invalid port, using default port.", true);
         }
 
         l.setup("RC Setup", "§eSettings completed. Generating basic file structure...", true);
@@ -229,6 +248,9 @@ public class Utils {
         try {
             JsonObject cfgFile = CloudConfig.getCfg();
             cfgFile.addProperty("redis_port", intRedisPort);
+            cfgFile.addProperty("redis_bind", redisBind);
+            cfgFile.addProperty("netty_port", nettyPort);
+            cfgFile.addProperty("custom_redis", !redis);
 
             Files.writeString(Paths.get(RedstoneCloud.workingDir + "/cloud.json"), cfgFile.toString());
             Files.writeString(Paths.get(RedstoneCloud.workingDir + "/.cloud.setup"), "Cloud is set up. Do not delete this file or the setup will start again.");

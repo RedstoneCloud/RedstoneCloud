@@ -1,5 +1,7 @@
 {
   "redis_port": 6379,
+  "redis_bind": "127.0.0.1",
+  "netty_port": 51123,
   "bridge": {
     "hub_template": "Lobby",
     "hubcommand_desc": "hub cmd lol",
