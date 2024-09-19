@@ -48,7 +48,7 @@ jobs:
       # Step 6: Create (or update) the 'snapshot' tag and push it
       - name: Create/Update Snapshot Tag
         run: |
-          git tag -f snapshot
+          git tag -f nightly
           git push --force origin nightly
 
       - name: Check and Delete Existing Release
