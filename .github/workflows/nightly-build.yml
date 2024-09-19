@@ -49,7 +49,7 @@ jobs:
       - name: Create/Update Snapshot Tag
         run: |
           git tag -f snapshot
-          git push --force origin snapshot
+          git push --force origin nightly
 
       - name: Check and Delete Existing Release
         run: |
