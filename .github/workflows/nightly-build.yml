@@ -76,7 +76,7 @@ jobs:
       - name: Upload all files individually
         run: |
           for file in snapshot/*; do
-            gh release upload nightly "$file" --repo $GITHUB_REPOSITORY --clobber;
+            gh release upload nightly "$file" --repo $GITHUB_REPOSITORY --clobber --name $(basename $file);
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
