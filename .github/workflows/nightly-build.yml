@@ -54,10 +54,10 @@ jobs:
       - name: Check and Delete Existing Release
         run: |
           set -e
-          existing_release_id=$(gh release view snapshot --json id --jq .id || echo "")
+          existing_release_id=$(gh release view nightly --json id --jq .id || echo "")
           if [ -n "$existing_release_id" ]; then
             echo "Deleting existing release with ID: $existing_release_id"
-            gh release delete snapshot --yes
+            gh release delete nightly --yes
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
