@@ -51,6 +51,17 @@ jobs:
           git tag -f snapshot
           git push --force origin snapshot
 
+      - name: Check and Delete Existing Release
+        run: |
+          set -e
+          existing_release_id=$(gh release view snapshot --json id --jq .id || echo "")
+          if [ -n "$existing_release_id" ]; then
+            echo "Deleting existing release with ID: $existing_release_id"
+            gh release delete snapshot --yes
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # Step 7: Create (or update) the GitHub release for the 'snapshot' tag
       - name: Create/Update GitHub Release
         id: create_release
