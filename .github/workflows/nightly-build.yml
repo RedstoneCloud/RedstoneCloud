@@ -75,13 +75,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Step 8: Upload individual build files to the release
-      - name: Upload files to release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./snapshot/
-          asset_name: ""
-          asset_content_type: application/octet-stream
+      #- name: Upload files to release
+      #  uses: actions/upload-release-asset@v1
+      #  with:
+      #    upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #    asset_path: ./snapshot/
+      #    asset_name: ""
+      #    asset_content_type: application/octet-stream
 
       # Step 9: Upload each file individually from the snapshot directory
       - name: Upload all files individually
