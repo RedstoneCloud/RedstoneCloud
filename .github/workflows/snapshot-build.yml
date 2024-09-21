@@ -1,12 +1,12 @@
-name: Nightly build
+name: Snapshot build
 
 on:
   push:
     branches:
-      - dev
+      - main
   pull_request:
     branches:
-      - dev
+      - main
 
 permissions:
   contents: write
@@ -48,16 +48,16 @@ jobs:
       # Step 6: Create (or update) the 'snapshot' tag and push it
       - name: Create/Update Snapshot Tag
         run: |
-          git tag -f nightly
-          git push --force origin nightly
+          git tag -f snapshot
+          git push --force origin snapshot
 
       - name: Check and Delete Existing Release
         run: |
           set -e
-          existing_release_id=$(gh release view nightly --json id --jq .id || echo "")
+          existing_release_id=$(gh release view snapshot --json id --jq .id || echo "")
           if [ -n "$existing_release_id" ]; then
             echo "Deleting existing release with ID: $existing_release_id"
-            gh release delete nightly --yes
+            gh release delete snapshot --yes
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -67,8 +67,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: nightly
-          release_name: Nightly Build
+          tag_name: snapshot
+          release_name: Snapshot Build
           draft: false
           prerelease: true
         env:
@@ -87,7 +87,7 @@ jobs:
       - name: Upload all files individually
         run: |
           for file in snapshot/*; do
-            gh release upload nightly "$file" --repo $GITHUB_REPOSITORY --clobber;
+            gh release upload snapshot "$file" --repo $GITHUB_REPOSITORY --clobber;
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
