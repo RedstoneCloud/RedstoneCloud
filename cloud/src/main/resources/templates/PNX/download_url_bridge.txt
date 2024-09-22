@@ -1,1 +1,1 @@
-https://github.com/WaterdogPE/WaterdogPE/releases/download/latest/Waterdog.jar
+https://github.com/RedstoneCloud/CloudBridge/releases/download/snapshot/cloudbridge.jar

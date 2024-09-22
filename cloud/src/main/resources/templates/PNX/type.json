@@ -1,6 +1,6 @@
 {
   "name": "PNX",
-  "startCommand": ["java", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "-jar", "server.jar"],
+  "startCommand": ["java", "-Dfile.encoding=UTF-8", "-Djansi.passthrough=true", "-Dterminal.ansi=true", "-XX:+UseZGC", "-XX:+ZGenerational", "-XX:+UseStringDeduplication", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED", "-jar", "server.jar"],
   "logsPath": "logs/server.log",
   "portSettingPlaceholder": "[port]",
   "portSettingFile": "server.properties",
