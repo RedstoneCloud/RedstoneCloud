@@ -225,7 +225,7 @@ public class Utils {
 
         l.setup("RC Setup", "§eCopying cloud setup files...", true);
         try {
-            FileUtils.copyURLToFile(Utils.getResourceFile("cloud.json"), new File("./config.json"));
+            FileUtils.copyURLToFile(Utils.getResourceFile("cloud.json"), new File("./cloud.json"));
             FileUtils.copyURLToFile(Utils.getResourceFile("language.json"), new File("./language.json"));
         } catch (IOException e) {
             e.printStackTrace();

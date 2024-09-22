@@ -17,7 +17,7 @@ settings:
   # Whether to install the Spark plugin on the server
   installSpark: true
   # Whether to enable WaterdogPE compatibility mode on the server
-  waterdogpe: false
+  waterdogpe: true
   # Tick cycle for server auto-save
   autosave: 6000
   # Whether to save unknown blocks, such as custom blocks that are not registered
