@@ -1,0 +1,93 @@
+name: Snapshot build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Java 23 environment
+      - name: Set up JDK 23
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '22'
+
+      # Step 3: Build the project using Maven
+      - name: Build with Maven
+        run: mvn clean install
+
+      # Step 4: Create a snapshot directory and move files
+      - name: Create Snapshot Directory
+        run: mkdir -p snapshot
+
+      - name: Move build files to snapshot
+        run: mv cloud/target/cloud-0.1-beta-shaded.jar snapshot/redstonecloud.jar
+
+      # Step 5: Set up Git configuration for tagging
+      - name: Set up Git for pushing
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Step 6: Create (or update) the 'snapshot' tag and push it
+      - name: Create/Update Snapshot Tag
+        run: |
+          git tag -f snapshot
+          git push --force origin snapshot
+
+      - name: Check and Delete Existing Release
+        run: |
+          set -e
+          existing_release_id=$(gh release view snapshot --json id --jq .id || echo "")
+          if [ -n "$existing_release_id" ]; then
+            echo "Deleting existing release with ID: $existing_release_id"
+            gh release delete snapshot --yes
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 7: Create (or update) the GitHub release for the 'snapshot' tag
+      - name: Create/Update GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: snapshot
+          release_name: Snapshot Build
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 8: Upload individual build files to the release
+      #- name: Upload files to release
+      #  uses: actions/upload-release-asset@v1
+      #  with:
+      #    upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #    asset_path: ./snapshot/
+      #    asset_name: ""
+      #    asset_content_type: application/octet-stream
+
+      # Step 9: Upload each file individually from the snapshot directory
+      - name: Upload all files individually
+        run: |
+          for file in snapshot/*; do
+            gh release upload snapshot "$file" --repo $GITHUB_REPOSITORY --clobber;
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

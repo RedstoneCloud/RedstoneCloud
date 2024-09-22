@@ -1,0 +1,8 @@
+{
+  "name": "Proxy",
+  "type": "WDPE",
+  "maxPlayers": 20,
+  "minServers": 1,
+  "maxServers": 1,
+  "staticServer": false
+}
