@@ -4,6 +4,7 @@ import de.redstonecloud.cloud.RedstoneCloud;
 import de.redstonecloud.cloud.commands.Command;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.server.Server;
+import io.netty.util.internal.EmptyArrays;
 
 import java.util.Arrays;
 
@@ -45,6 +46,6 @@ public class StopCommand extends Command {
 
     @Override
     public String[] getArgs() {
-        return getServer().getServerManager().getServers().keySet().toArray(String[]::new);
+        return getServer().getServerManager().getServers().keySet().toArray(EmptyArrays.EMPTY_STRINGS);
     }
 }

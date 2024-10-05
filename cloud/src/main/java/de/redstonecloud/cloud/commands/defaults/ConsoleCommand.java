@@ -5,6 +5,7 @@ import de.redstonecloud.cloud.commands.Command;
 import de.redstonecloud.cloud.logger.Logger;
 import de.redstonecloud.cloud.server.Server;
 import de.redstonecloud.cloud.server.ServerLogger;
+import io.netty.util.internal.EmptyArrays;
 
 public class ConsoleCommand extends Command {
     public int argCount = 1;
@@ -35,6 +36,6 @@ public class ConsoleCommand extends Command {
 
     @Override
     public String[] getArgs() {
-        return getServer().getServerManager().getServers().keySet().toArray(String[]::new);
+        return getServer().getServerManager().getServers().keySet().toArray(EmptyArrays.EMPTY_STRINGS);
     }
 }

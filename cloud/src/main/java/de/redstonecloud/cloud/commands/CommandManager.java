@@ -41,7 +41,7 @@ public class CommandManager {
                 e.printStackTrace();
             }
         } else {
-            if(!command.equals("")) {
+            if(!command.isEmpty()) {
                 logger.info("This command does not exist!");
             }
         }
