@@ -17,4 +17,9 @@ public class ClientDisconnectHandler extends ChannelInboundHandlerAdapter {
         //System.out.println("[NETTY] Channel disconnected with clientId " + this.clientId);
         super.channelInactive(ctx);
     }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        System.err.println("[NETTY] Caught an exception: " + cause.getMessage());
+    }
 }
