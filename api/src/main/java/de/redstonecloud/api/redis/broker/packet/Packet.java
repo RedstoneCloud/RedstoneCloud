@@ -18,7 +18,7 @@ public abstract class Packet {
     public abstract void serialize(JsonArray data);
     public abstract void deserialize(JsonArray data);
 
-    protected int sessionId = ThreadLocalRandom.current().nextInt(0, 1000);
+    protected int sessionId = ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE);
 
     protected String from = Broker.get().getMainRoute();
     protected String to = "cloud";
