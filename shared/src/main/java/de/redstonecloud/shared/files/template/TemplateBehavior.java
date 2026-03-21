@@ -19,6 +19,9 @@ public class TemplateBehavior extends OkaeriConfig {
     @Comment("Maximum servers running in total")
     int maxServers = 2;
 
+    @Comment("Create a new server when any server reaches this fraction of maxPlayers")
+    double preStartThreshold = 0.8;
+
     @Comment("Maximum boot time before boot is cancelled (in ms)")
     int bootMillis = 60000;
 

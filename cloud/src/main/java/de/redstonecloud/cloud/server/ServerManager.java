@@ -137,6 +137,7 @@ public class ServerManager {
                     .maxPlayers(behavior.maxPlayers())
                     .minServers(behavior.minServers())
                     .maxServers(behavior.maxServers())
+                    .preStartThreshold(behavior.preStartThreshold())
                     .staticServer(info.isStatic())
                     .shutdownTimeMs(behavior.shutdownMillis())
                     .maxBootTimeMs(behavior.bootMillis())
@@ -509,8 +510,6 @@ public class ServerManager {
         bridgeJson.addProperty("hub_template", bridgeSettings.hubTemplate());
         bridgeJson.addProperty("hubcommand_desc", bridgeSettings.hubDescription());
         bridgeJson.addProperty("hubcommand_no_hub_available", bridgeSettings.hubNotAvailable());
-        bridgeJson.addProperty("fallback_name", bridgeSettings.fallbackServer());
-        bridgeJson.addProperty("fallback_on_join", bridgeSettings.fallbackOnJoin());
 
         ServerImpl server = ServerImpl.builder()
                 .address(clusterNode != null ? clusterNode.getAddress() : "127.0.0.1")

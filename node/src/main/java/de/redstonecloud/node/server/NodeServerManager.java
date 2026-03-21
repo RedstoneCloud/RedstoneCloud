@@ -109,6 +109,7 @@ public class NodeServerManager {
                     .maxPlayers(behavior.maxPlayers())
                     .minServers(behavior.minServers())
                     .maxServers(behavior.maxServers())
+                    .preStartThreshold(behavior.preStartThreshold())
                     .staticServer(info.isStatic())
                     .shutdownTimeMs(behavior.shutdownMillis())
                     .maxBootTimeMs(behavior.bootMillis())

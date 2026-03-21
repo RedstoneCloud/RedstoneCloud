@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuperBuilder
 @Getter
@@ -40,7 +41,15 @@ public abstract class Template {
     private long maxBootTimeMs = 60 * 1000; // 1 minute
 
     @Builder.Default
+    private double preStartThreshold = 0.8;
+
+    @Builder.Default
     private List<String> nodes = List.of();
+
+    @Builder.Default
+    private AtomicBoolean createInProgress = new AtomicBoolean(false);
+
+    private long createStartedAtMs = 0;
 
     public void checkServers() {
         Server[] servers = getServers();
@@ -48,9 +57,34 @@ public abstract class Template {
 
         handleIdleServers(servers);
 
-        if (shouldCreateNewServer(servers)) {
-            createNewServer();
+        if (shouldCreateNewServer(servers) && tryBeginCreate()) {
+            try {
+                createNewServer();
+            } finally {
+                finishCreate();
+            }
         }
+    }
+
+    private boolean tryBeginCreate() {
+        long now = System.currentTimeMillis();
+        if (createInProgress.get()) {
+            if (now - createStartedAtMs > maxBootTimeMs) {
+                createInProgress.set(false);
+            } else {
+                return false;
+            }
+        }
+        if (createInProgress.compareAndSet(false, true)) {
+            createStartedAtMs = now;
+            return true;
+        }
+        return false;
+    }
+
+    private void finishCreate() {
+        createStartedAtMs = 0;
+        createInProgress.set(false);
     }
 
     protected abstract Server[] getServers();
@@ -58,21 +92,29 @@ public abstract class Template {
     private void handleIdleServers(Server[] servers) {
         if (!stopOnEmpty) return;
 
+        if (runningServers <= minServers) return;
+
         for (Server server : servers) {
             if (isServerIdle(server)) {
                 server.kill();
+                runningServers--;
+                if (runningServers <= minServers) {
+                    return;
+                }
             }
         }
     }
 
     private boolean isServerIdle(Server server) {
+        if (server.getStatus() != ServerStatus.RUNNING) return false;
         boolean hasNoPlayers = server.getPlayers().isEmpty();
         boolean exceedsIdleTime = (System.currentTimeMillis() - server.getLastPlayerUpdate()) > IDLE_TIMEOUT_MS;
         return hasNoPlayers && exceedsIdleTime;
     }
 
     private boolean shouldCreateNewServer(Server[] servers) {
-        return (needsMoreServers() || allServersBlocked(servers)) && canCreateMoreServers();
+        return (needsMoreServers() || allServersBlocked(servers) || allServersAtOrAboveThreshold(servers))
+                && canCreateMoreServers();
     }
 
     private boolean needsMoreServers() {
@@ -83,6 +125,34 @@ public abstract class Template {
         if (minServers <= 0 || servers.length == 0) return false;
 
         return countBlockedServers(servers) == servers.length;
+    }
+
+    private boolean allServersAtOrAboveThreshold(Server[] servers) {
+        if (servers.length == 0 || maxPlayers <= 0) return false;
+
+        int threshold = calculatePreStartPlayers();
+        boolean hasEligibleServer = false;
+        for (Server server : servers) {
+            if (isServerBlocked(server)) {
+                continue;
+            }
+
+            hasEligibleServer = true;
+            if (server.getPlayers().size() < threshold) {
+                return false;
+            }
+        }
+        return hasEligibleServer;
+    }
+
+    private int calculatePreStartPlayers() {
+        double threshold = preStartThreshold;
+        if (threshold <= 0.0 || threshold > 1.0) {
+            threshold = 1.0;
+        }
+
+        int value = (int) Math.ceil(maxPlayers * threshold);
+        return Math.max(1, value);
     }
 
     private int countBlockedServers(Server[] servers) {
@@ -103,7 +173,7 @@ public abstract class Template {
     }
 
     private boolean canCreateMoreServers() {
-        return runningServers <= maxServers;
+        return runningServers < maxServers;
     }
 
     protected abstract void createNewServer();
@@ -121,6 +191,7 @@ public abstract class Template {
         this.stopOnEmpty = other.stopOnEmpty;
         this.shutdownTimeMs = other.shutdownTimeMs;
         this.maxBootTimeMs = other.maxBootTimeMs;
+        this.preStartThreshold = other.preStartThreshold;
         return this;
     }
 }
