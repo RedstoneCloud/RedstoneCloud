@@ -186,10 +186,25 @@ public abstract class Server implements ICloudServer, Cacheable {
             Path serverDir = Path.of(basePath, name);
 
             startMethod.setDirectory(serverDir.toString());
+            directory = serverDir.toString();
+
             Path templatePath = Path.of(Directories.TEMPLATES_DIR.getAbsolutePath(), template.getName());
 
             startMethod.prepare(templatePath.toString(), type.startCommand(), env);
-            configureServerPort(Path.of(startMethod.getDirectory()));
+            configureServerPort(serverDir);
+
+            File typePluginsFolder = new File(Directories.PLUGINS_DIR, type.name());
+            File targetPluginsFolder = new File(serverDir.toFile(), "plugins");
+
+            if (typePluginsFolder.exists() && typePluginsFolder.isDirectory()) {
+                if (!targetPluginsFolder.exists()) {
+                    targetPluginsFolder.mkdirs();
+                }
+
+                FileUtils.copyDirectory(typePluginsFolder, targetPluginsFolder);
+                log.info("Successfully copied plugins for type: {}", type.name());
+            }
+
             setStatus(ServerStatus.PREPARED);
         } catch (Exception e) {
             log.error("Failed to prepare server {}", name, e);
@@ -302,7 +317,6 @@ public abstract class Server implements ICloudServer, Cacheable {
             startMethod.setOnExit(this::onExit);
             startMethod.start();
             scheduleStartupTimeout();
-            directory = startMethod.getDirectory();
         } catch (Exception e) {
             log.error("Failed to start server {}", name, e);
             setStatus(ServerStatus.STOPPED);
@@ -311,7 +325,6 @@ public abstract class Server implements ICloudServer, Cacheable {
 
     private void scheduleStartupTimeout() {
         Timer timer = new Timer();
-
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -319,15 +332,10 @@ public abstract class Server implements ICloudServer, Cacheable {
                     log.error("Server {} failed to start within timeout period, killing server", name);
                     kill();
                 }
-
                 timer.cancel();
             }
         }, template.getMaxBootTimeMs());
     }
-
-    /**
-     * Kills the server process.
-     */
 
     public void kill() {
         log.info("Killing {}", name);
@@ -335,7 +343,6 @@ public abstract class Server implements ICloudServer, Cacheable {
             killRemote();
             return;
         }
-
         stop();
         startMethod.kill(template.getShutdownTimeMs());
     }

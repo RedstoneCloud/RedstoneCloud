@@ -81,7 +81,7 @@ public class Message {
     @Setter
     @Accessors(chain = true)
     public static class Builder {
-        protected int id = ThreadLocalRandom.current().nextInt(0, 1000);
+        protected int id = ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE);
         protected String from = Broker.get().getMainRoute();
         protected String to;
         protected ObjectArrayList<String> arguments = new ObjectArrayList<>();

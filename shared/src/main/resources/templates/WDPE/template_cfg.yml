@@ -18,6 +18,8 @@ behavior:
   minServers: 1
   # Maximum servers running in total
   maxServers: 1
+  # Create a new server when any server reaches this fraction of maxPlayers
+  preStartThreshold: 0.8
   # Maximum boot time before boot is cancelled (in ms)
   bootMillis: 60000
   # Maximum shutdown time before final kill (in ms)

@@ -5,6 +5,7 @@ import java.io.File;
 public class Directories {
     public static File setupCheck = new File("./.cloud.setup");
 
+    public static final File PLUGINS_DIR = new File("./plugins/");
     public static final File TEMP_DIR = new File("./tmp/");
     public static final File SERVERS_DIR = new File("./servers/");
     public static final File TEMPLATES_DIR = new File("./templates/");
