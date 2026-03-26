@@ -50,4 +50,17 @@ public abstract class Packet {
 
         broker.publish(this);
     }
+
+    public void sendImmediately() {
+        this.sendImmediately(null, null);
+    }
+
+    public <T extends Packet> void sendImmediately(Class<T> packetType, Consumer<T> callback) {
+        Broker broker = Broker.get();
+
+        if (callback != null)
+            broker.addPendingResponse(this.sessionId, new ResponseContainer<>(packetType, callback));
+
+        broker.publishImmediately(this);
+    }
 }

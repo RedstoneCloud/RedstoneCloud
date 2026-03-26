@@ -19,10 +19,12 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -50,6 +52,11 @@ public class Broker {
     protected Map<Integer, Consumer<Message>> pendingMessageResponses;
 
     private final ExecutorService publishExecutor = Executors.newFixedThreadPool(8);
+    private final ScheduledExecutorService batchExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread thread = new Thread(r, "Redis-Packet-Batcher");
+        thread.setDaemon(true);
+        return thread;
+    });
     private final ExecutorService inboundExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "Redis-Subscriber-Dispatcher");
         thread.setDaemon(true);
@@ -58,6 +65,8 @@ public class Broker {
     private final BlockingQueue<InboundPayload> inboundQueue = new LinkedBlockingQueue<>();
     private final AtomicLong lastQueueWarnMillis = new AtomicLong(0L);
     private static final int QUEUE_WARN_THRESHOLD = 10_000;
+    private static final long BATCH_INTERVAL_MS = 100L;
+    private final ConcurrentHashMap<String, ConcurrentLinkedQueue<JsonArray>> packetBatchQueues = new ConcurrentHashMap<>();
     private BrokerJedisPubSub pubsub;
     private volatile boolean running = false;
 
@@ -97,6 +106,7 @@ public class Broker {
 
         running = true;
         startInboundDispatcher();
+        startBatcher();
         new Thread(() -> {
             while (running) {
                 try (Jedis jedis = new Jedis(address, port, 0)) {
@@ -125,11 +135,51 @@ public class Broker {
     }
 
     public void publish(Packet packet) {
-        publishInternal(packet.getTo().toLowerCase(), packet.finalDocument().toString());
+        enqueuePacket(packet);
     }
 
     public void publish(Message message) {
         publishInternal(message.getTo().toLowerCase(), message.toJson());
+    }
+
+    public void publishImmediately(Packet packet) {
+        publishInternal(packet.getTo().toLowerCase(), packet.finalDocument().toString());
+    }
+
+    private void enqueuePacket(Packet packet) {
+        String channel = packet.getTo().toLowerCase();
+        packetBatchQueues
+                .computeIfAbsent(channel, k -> new ConcurrentLinkedQueue<>())
+                .add(packet.finalDocument());
+    }
+
+    private void startBatcher() {
+        batchExecutor.scheduleAtFixedRate(this::flushPacketBatches, BATCH_INTERVAL_MS, BATCH_INTERVAL_MS, TimeUnit.MILLISECONDS);
+    }
+
+    private void flushPacketBatches() {
+        for (Map.Entry<String, ConcurrentLinkedQueue<JsonArray>> entry : packetBatchQueues.entrySet()) {
+            ConcurrentLinkedQueue<JsonArray> queue = entry.getValue();
+            if (queue.isEmpty()) {
+                continue;
+            }
+
+            JsonArray batch = new JsonArray();
+            batch.add("batch");
+
+            JsonArray packets = new JsonArray();
+            JsonArray doc;
+            while ((doc = queue.poll()) != null) {
+                packets.add(doc);
+            }
+
+            if (packets.size() == 0) {
+                continue;
+            }
+
+            batch.add(packets);
+            publishInternal(entry.getKey(), batch.toString());
+        }
     }
 
     private void publishInternal(String channel, String payload) {
@@ -177,6 +227,7 @@ public class Broker {
         }
         this.pool.close();
         this.publishExecutor.shutdown();
+        this.batchExecutor.shutdown();
         this.inboundExecutor.shutdown();
     }
 
@@ -222,51 +273,19 @@ public class Broker {
         String type = array.get(0).getAsString();
 
         switch (type) {
-            case "packet" -> {
-                Packet packet = packetRegistry.create(array);
-
-                if (packet == null) {
-                    System.out.println("[BROKER] Received invalid packet: " + messageString);
+            case "packet" -> handlePacketInbound(channel, array);
+            case "batch" -> {
+                if (array.size() < 2 || !array.get(1).isJsonArray()) {
+                    System.out.println("[BROKER] Received invalid batch: " + messageString);
                     return;
                 }
 
-                Optional.ofNullable(pendingPacketResponses.remove(packet.getSessionId()))
-                        .ifPresent(responseContainer -> {
-                            Consumer<? extends Packet> consumer = responseContainer.consumer();
-                            Class<? extends Packet> packetClass = responseContainer.packetClass();
-
-                            if (packetClass.isInstance(packet)) {
-                                try {
-                                    ((Consumer<Packet>) consumer).accept(packetClass.cast(packet));
-                                } catch (Exception e) {
-                                    System.err.println("[BROKER] Packet response handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-
-                CopyOnWriteArrayList<Consumer<Packet>> packetListeners = packetConsumers.get(channel);
-                if (packetListeners != null) {
-                    packetListeners.forEach(consumer -> {
-                        try {
-                            consumer.accept(packet);
-                        } catch (Exception e) {
-                            System.err.println("[BROKER] Packet handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
-                            e.printStackTrace();
-                        }
-                    });
-                }
-
-                CopyOnWriteArrayList<Consumer<Packet>> wildcardPacketListeners = packetConsumers.get("");
-                if (wildcardPacketListeners != null) {
-                    wildcardPacketListeners.forEach(consumer -> {
-                        try {
-                            consumer.accept(packet);
-                        } catch (Exception e) {
-                            System.err.println("[BROKER] Packet wildcard handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
-                            e.printStackTrace();
-                        }
-                    });
+                JsonArray packets = array.get(1).getAsJsonArray();
+                for (int i = 0; i < packets.size(); i++) {
+                    if (!packets.get(i).isJsonArray()) {
+                        continue;
+                    }
+                    handlePacketInbound(channel, packets.get(i).getAsJsonArray());
                 }
             }
             case "message" -> {
@@ -307,6 +326,55 @@ public class Broker {
                 }
             }
             default -> System.out.println("[BROKER] Received unknown message type " + type);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void handlePacketInbound(String channel, JsonArray array) {
+        Packet packet = packetRegistry.create(array);
+
+        if (packet == null) {
+            System.out.println("[BROKER] Received invalid packet: " + array);
+            return;
+        }
+
+        Optional.ofNullable(pendingPacketResponses.remove(packet.getSessionId()))
+                .ifPresent(responseContainer -> {
+                    Consumer<? extends Packet> consumer = responseContainer.consumer();
+                    Class<? extends Packet> packetClass = responseContainer.packetClass();
+
+                    if (packetClass.isInstance(packet)) {
+                        try {
+                            ((Consumer<Packet>) consumer).accept(packetClass.cast(packet));
+                        } catch (Exception e) {
+                            System.err.println("[BROKER] Packet response handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+        CopyOnWriteArrayList<Consumer<Packet>> packetListeners = packetConsumers.get(channel);
+        if (packetListeners != null) {
+            packetListeners.forEach(consumer -> {
+                try {
+                    consumer.accept(packet);
+                } catch (Exception e) {
+                    System.err.println("[BROKER] Packet handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        CopyOnWriteArrayList<Consumer<Packet>> wildcardPacketListeners = packetConsumers.get("");
+        if (wildcardPacketListeners != null) {
+            wildcardPacketListeners.forEach(consumer -> {
+                try {
+                    consumer.accept(packet);
+                } catch (Exception e) {
+                    System.err.println("[BROKER] Packet wildcard handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
+                    e.printStackTrace();
+                }
+            });
         }
     }
 
