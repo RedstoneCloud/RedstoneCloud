@@ -19,12 +19,18 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+<<<<<<< dev
 import java.util.concurrent.ConcurrentLinkedQueue;
+=======
+>>>>>>> main
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+<<<<<<< dev
 import java.util.concurrent.ScheduledExecutorService;
+=======
+>>>>>>> main
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -52,11 +58,14 @@ public class Broker {
     protected Map<Integer, Consumer<Message>> pendingMessageResponses;
 
     private final ExecutorService publishExecutor = Executors.newFixedThreadPool(8);
+<<<<<<< dev
     private final ScheduledExecutorService batchExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r, "Redis-Packet-Batcher");
         thread.setDaemon(true);
         return thread;
     });
+=======
+>>>>>>> main
     private final ExecutorService inboundExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread thread = new Thread(r, "Redis-Subscriber-Dispatcher");
         thread.setDaemon(true);
@@ -65,8 +74,11 @@ public class Broker {
     private final BlockingQueue<InboundPayload> inboundQueue = new LinkedBlockingQueue<>();
     private final AtomicLong lastQueueWarnMillis = new AtomicLong(0L);
     private static final int QUEUE_WARN_THRESHOLD = 10_000;
+<<<<<<< dev
     private static final long BATCH_INTERVAL_MS = 100L;
     private final ConcurrentHashMap<String, ConcurrentLinkedQueue<JsonArray>> packetBatchQueues = new ConcurrentHashMap<>();
+=======
+>>>>>>> main
     private BrokerJedisPubSub pubsub;
     private volatile boolean running = false;
 
@@ -106,7 +118,10 @@ public class Broker {
 
         running = true;
         startInboundDispatcher();
+<<<<<<< dev
         startBatcher();
+=======
+>>>>>>> main
         new Thread(() -> {
             while (running) {
                 try (Jedis jedis = new Jedis(address, port, 0)) {
@@ -135,13 +150,18 @@ public class Broker {
     }
 
     public void publish(Packet packet) {
+<<<<<<< dev
         enqueuePacket(packet);
+=======
+        publishInternal(packet.getTo().toLowerCase(), packet.finalDocument().toString());
+>>>>>>> main
     }
 
     public void publish(Message message) {
         publishInternal(message.getTo().toLowerCase(), message.toJson());
     }
 
+<<<<<<< dev
     public void publishImmediately(Packet packet) {
         publishInternal(packet.getTo().toLowerCase(), packet.finalDocument().toString());
     }
@@ -182,6 +202,8 @@ public class Broker {
         }
     }
 
+=======
+>>>>>>> main
     private void publishInternal(String channel, String payload) {
         publishExecutor.submit(() -> {
             int attempt = 0;
@@ -227,7 +249,10 @@ public class Broker {
         }
         this.pool.close();
         this.publishExecutor.shutdown();
+<<<<<<< dev
         this.batchExecutor.shutdown();
+=======
+>>>>>>> main
         this.inboundExecutor.shutdown();
     }
 
@@ -273,6 +298,7 @@ public class Broker {
         String type = array.get(0).getAsString();
 
         switch (type) {
+<<<<<<< dev
             case "packet" -> handlePacketInbound(channel, array);
             case "batch" -> {
                 if (array.size() < 2 || !array.get(1).isJsonArray()) {
@@ -378,6 +404,96 @@ public class Broker {
         }
     }
 
+=======
+            case "packet" -> {
+                Packet packet = packetRegistry.create(array);
+
+                if (packet == null) {
+                    System.out.println("[BROKER] Received invalid packet: " + messageString);
+                    return;
+                }
+
+                Optional.ofNullable(pendingPacketResponses.remove(packet.getSessionId()))
+                        .ifPresent(responseContainer -> {
+                            Consumer<? extends Packet> consumer = responseContainer.consumer();
+                            Class<? extends Packet> packetClass = responseContainer.packetClass();
+
+                            if (packetClass.isInstance(packet)) {
+                                try {
+                                    ((Consumer<Packet>) consumer).accept(packetClass.cast(packet));
+                                } catch (Exception e) {
+                                    System.err.println("[BROKER] Packet response handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+                CopyOnWriteArrayList<Consumer<Packet>> packetListeners = packetConsumers.get(channel);
+                if (packetListeners != null) {
+                    packetListeners.forEach(consumer -> {
+                        try {
+                            consumer.accept(packet);
+                        } catch (Exception e) {
+                            System.err.println("[BROKER] Packet handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                CopyOnWriteArrayList<Consumer<Packet>> wildcardPacketListeners = packetConsumers.get("");
+                if (wildcardPacketListeners != null) {
+                    wildcardPacketListeners.forEach(consumer -> {
+                        try {
+                            consumer.accept(packet);
+                        } catch (Exception e) {
+                            System.err.println("[BROKER] Packet wildcard handler failed (route=" + channel + ", session=" + packet.getSessionId() + ")");
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+            case "message" -> {
+                Message message = Message.fromJson(array);
+
+                Optional.ofNullable(pendingMessageResponses.remove(message.getId()))
+                        .ifPresent(consumer -> {
+                            try {
+                                consumer.accept(message);
+                            } catch (Exception e) {
+                                System.err.println("[BROKER] Message response handler failed (route=" + channel + ", id=" + message.getId() + ")");
+                                e.printStackTrace();
+                            }
+                        });
+
+                CopyOnWriteArrayList<Consumer<Message>> messageListeners = messageConsumers.get(channel);
+                if (messageListeners != null) {
+                    messageListeners.forEach(consumer -> {
+                        try {
+                            consumer.accept(message);
+                        } catch (Exception e) {
+                            System.err.println("[BROKER] Message handler failed (route=" + channel + ", id=" + message.getId() + ")");
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                CopyOnWriteArrayList<Consumer<Message>> wildcardMessageListeners = messageConsumers.get("");
+                if (wildcardMessageListeners != null) {
+                    wildcardMessageListeners.forEach(consumer -> {
+                        try {
+                            consumer.accept(message);
+                        } catch (Exception e) {
+                            System.err.println("[BROKER] Message wildcard handler failed (route=" + channel + ", id=" + message.getId() + ")");
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+            default -> System.out.println("[BROKER] Received unknown message type " + type);
+        }
+    }
+
+>>>>>>> main
     private record InboundPayload(String channel, String messageString) {}
 
     @SuppressWarnings("unchecked")
