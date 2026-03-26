@@ -60,7 +60,7 @@ public class PacketHandler {
                 p = CloudPlayer.builder()
                         .name(packet.getPlayerName())
                         .uuid(packet.getUuid())
-                        .address(HostAndPort.fromParts(packet.getIpAddress(), 1))
+                        .address(HostAndPort.fromString(packet.getIpAddress()))
                         .build();
 
                 PlayerManager.getInstance().addPlayer(p);
